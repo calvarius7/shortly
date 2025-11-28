@@ -1,0 +1,161 @@
+image: eclipse-temurin:25-jdk-jammy
+
+default:
+  tags:
+    - docker
+  interruptible: true
+  cache:
+    - key: "m2_${CI_COMMIT_REF_SLUG}"
+      fallback_keys:
+        - "m2_${CI_DEFAULT_BRANCH}"
+      paths:
+        - .m2/repository
+
+variables:
+  MAVEN_REPO_LOCAL: "$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_CLI_OPTS: "--no-transfer-progress -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -B -V"
+
+include:
+  - remote: 'https://raw.githubusercontent.com/green-coding-solutions/eco-ci-energy-estimation/main/eco-ci-gitlab.yml'
+
+stages:
+  - build
+  - test
+  - quality
+
+# ---------- BUILD ----------
+
+build-native:
+  stage: build
+  image: ghcr.io/graalvm/jdk-community:25
+  before_script:
+    - mkdir -p .m2/repository
+    - gu install native-image
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -DskipTests -Pnative native:compile
+  artifacts:
+    name: "shortly-$CI_COMMIT_REF_SLUG-$CI_JOB_ID"
+    when: always
+    expire_in: 1 day
+    paths:
+      - target/shortly
+      - target/*.jar
+      - target/native/**
+
+# ---------- TEST (parallel) ----------
+
+unit-tests:
+  stage: test
+  needs: [ "build-native" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -DskipITs=true verify
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit:
+        - target/surefire-reports/*.xml
+      coverage_report:
+        coverage_format: jacoco
+        path: target/site/jacoco/jacoco.xml
+    paths:
+      - target/surefire-reports/*
+      - target/*.jar
+      - target/shortly
+
+integration-tests:
+  stage: test
+  needs: [ "build-native" ]
+  services:
+    - name: docker:dind
+      command: [ "--mtu=1460" ]
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+    TESTCONTAINERS_RYUK_DISABLED: "true"
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -DfailIfNoTests=false test-compile failsafe:integration-test failsafe:verify
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit:
+        - target/failsafe-reports/TEST-*.xml
+    paths:
+      - target/failsafe-reports/*
+
+mutation-tests:
+  stage: test
+  needs: [ "build-native" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -Dpitest.failWhenNoMutations=false -DskipTests org.pitest:pitest-maven:mutationCoverage
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - target/pit-reports/**
+
+# ---------- QUALITY (parallel) ----------
+
+quality-checkstyle:
+  stage: quality
+  needs: [ "build-native" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS checkstyle:checkstyle
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - target/checkstyle-result.xml
+      - target/checkstyle*.xml
+
+quality-pmd:
+  stage: quality
+  needs: [ "build-native" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS pmd:pmd
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - target/pmd.xml
+      - target/site/pmd.html
+
+quality-spotbugs:
+  stage: quality
+  needs: [ "build-native" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS com.github.spotbugs:spotbugs-maven-plugin:spotbugs
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - target/spotbugsXml.xml
+      - target/spotbugsHtml.html
+
+quality-dependency-check:
+  stage: quality
+  needs: [ "build-native" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS org.owasp:dependency-check-maven:aggregate -Dformat=ALL -DfailBuildOnCVSS=11
+    - ./mvnw $MAVEN_CLI_OPTS cyclonedx:makeAggregateBom
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - target/dependency-check-report.*
+      - target/bom.xml
+
+quality-trivy:
+  stage: quality
+  image: aquasec/trivy:latest
+  needs: [ "build-native" ]
+  script:
+    - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy.sarif .
+    - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy.json .
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - trivy.sarif
+      - trivy.json
