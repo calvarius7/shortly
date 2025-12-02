@@ -30,6 +30,7 @@ build-native:
   image: eclipse-temurin:25-jdk-jammy
   before_script:
     - mkdir -p .m2/repository
+    - chmod +x ./mvnw
   script:
     - ./mvnw $MAVEN_CLI_OPTS -DskipTests spring-boot:build-image -Pnative
   artifacts:
