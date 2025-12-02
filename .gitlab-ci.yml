@@ -119,6 +119,7 @@ quality-pmd:
   stage: quality
   needs: [ "build" ]
   script:
+    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS pmd:pmd
   artifacts:
     when: always
