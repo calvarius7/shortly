@@ -27,19 +27,23 @@ stages:
 
 build-native:
   stage: build
-  image: bellsoft/liberica-native-image-kit-container:jdk-25-nik-24-glibc
+  image: eclipse-temurin:25-jdk-jammy
+  services:
+    - name: docker:dind
+      command: [ "--mtu=1460" ]
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
   before_script:
     - mkdir -p .m2/repository
   script:
-    - ./mvnw $MAVEN_CLI_OPTS -DskipTests -Pnative native:compile
+    - ./mvnw $MAVEN_CLI_OPTS -DskipTests spring-boot:build-image -Pnative
   artifacts:
     name: "shortly-$CI_COMMIT_REF_SLUG-$CI_JOB_ID"
     when: always
     expire_in: 1 day
     paths:
-      - target/shortly
       - target/*.jar
-      - target/native/**
 
 # ---------- TEST (parallel) ----------
 
