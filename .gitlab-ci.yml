@@ -30,7 +30,6 @@ build-native:
   image: ghcr.io/graalvm/jdk-community:25
   before_script:
     - mkdir -p .m2/repository
-    - gu install native-image
   script:
     - ./mvnw $MAVEN_CLI_OPTS -DskipTests -Pnative native:compile
   artifacts:
