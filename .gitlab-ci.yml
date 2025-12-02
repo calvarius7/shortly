@@ -22,30 +22,42 @@ stages:
   - build
   - test
   - quality
+  - package
 
 # ---------- BUILD ----------
 
-build-native:
+build:
   stage: build
-  image: eclipse-temurin:25-jdk-jammy
   before_script:
     - mkdir -p .m2/repository
     - chmod +x ./mvnw
   script:
-    - ./mvnw $MAVEN_CLI_OPTS -DskipTests spring-boot:build-image -Pnative
+    - ./mvnw $MAVEN_CLI_OPTS -DskipTests package
   artifacts:
-    name: "shortly-$CI_COMMIT_REF_SLUG-$CI_JOB_ID"
-    when: always
     expire_in: 1 day
     paths:
       - target/*.jar
+      - target/classes
 
+build-native-image:
+  stage: package
+  needs: [ "unit-tests", "integration-tests" ]
+  before_script:
+    - mkdir -p .m2/repository
+    - chmod +x ./mvnw
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -DskipTests spring-boot:build-image -Pnative -Dspring-boot.build-image.imageName=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  only:
+    - tags
 # ---------- TEST (parallel) ----------
 
 unit-tests:
   stage: test
-  needs: [ "build-native" ]
+  needs: [ "build" ]
   script:
+    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS -DskipITs=true verify
   artifacts:
     when: always
@@ -63,15 +75,9 @@ unit-tests:
 
 integration-tests:
   stage: test
-  needs: [ "build-native" ]
-  services:
-    - name: docker:dind
-      command: [ "--mtu=1460" ]
-  variables:
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_HOST: tcp://docker:2375
-    TESTCONTAINERS_RYUK_DISABLED: "true"
+  needs: [ "build" ]
   script:
+    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS -DfailIfNoTests=false test-compile failsafe:integration-test failsafe:verify
   artifacts:
     when: always
@@ -84,8 +90,9 @@ integration-tests:
 
 mutation-tests:
   stage: test
-  needs: [ "build-native" ]
+  needs: [ "build" ]
   script:
+    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS -Dpitest.failWhenNoMutations=false -DskipTests org.pitest:pitest-maven:mutationCoverage
   artifacts:
     when: always
@@ -97,8 +104,9 @@ mutation-tests:
 
 quality-checkstyle:
   stage: quality
-  needs: [ "build-native" ]
+  needs: [ "build" ]
   script:
+    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS checkstyle:checkstyle
   artifacts:
     when: always
@@ -109,7 +117,7 @@ quality-checkstyle:
 
 quality-pmd:
   stage: quality
-  needs: [ "build-native" ]
+  needs: [ "build" ]
   script:
     - ./mvnw $MAVEN_CLI_OPTS pmd:pmd
   artifacts:
@@ -121,8 +129,9 @@ quality-pmd:
 
 quality-spotbugs:
   stage: quality
-  needs: [ "build-native" ]
+  needs: [ "build" ]
   script:
+    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS com.github.spotbugs:spotbugs-maven-plugin:spotbugs
   artifacts:
     when: always
@@ -133,8 +142,9 @@ quality-spotbugs:
 
 quality-dependency-check:
   stage: quality
-  needs: [ "build-native" ]
+  needs: [ "build" ]
   script:
+    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS org.owasp:dependency-check-maven:aggregate -Dformat=ALL -DfailBuildOnCVSS=11
     - ./mvnw $MAVEN_CLI_OPTS cyclonedx:makeAggregateBom
   artifacts:
@@ -147,7 +157,7 @@ quality-dependency-check:
 quality-trivy:
   stage: quality
   image: aquasec/trivy:latest
-  needs: [ "build-native" ]
+  needs: [ "build" ]
   script:
     - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy.sarif .
     - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy.json .
