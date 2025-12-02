@@ -27,7 +27,7 @@ stages:
 
 build-native:
   stage: build
-  image: ghcr.io/graalvm/jdk-community:25
+  image: bellsoft/liberica-native-image-kit-container:jdk-25-nik-24-glibc
   before_script:
     - mkdir -p .m2/repository
   script:
