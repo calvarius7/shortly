@@ -107,7 +107,7 @@ quality-checkstyle:
   needs: [ "build" ]
   script:
     - chmod +x ./mvnw
-    - ./mvnw $MAVEN_CLI_OPTS checkstyle:checkstyle
+    - ./mvnw $MAVEN_CLI_OPTS checkstyle:check
   artifacts:
     when: always
     expire_in: 1 week
@@ -120,7 +120,7 @@ quality-pmd:
   needs: [ "build" ]
   script:
     - chmod +x ./mvnw
-    - ./mvnw $MAVEN_CLI_OPTS pmd:pmd
+    - ./mvnw $MAVEN_CLI_OPTS pmd:check
   artifacts:
     when: always
     expire_in: 1 week
@@ -133,7 +133,7 @@ quality-spotbugs:
   needs: [ "build" ]
   script:
     - chmod +x ./mvnw
-    - ./mvnw $MAVEN_CLI_OPTS com.github.spotbugs:spotbugs-maven-plugin:spotbugs
+    - ./mvnw $MAVEN_CLI_OPTS com.github.spotbugs:spotbugs-maven-plugin:check
   artifacts:
     when: always
     expire_in: 1 week
@@ -146,7 +146,7 @@ quality-dependency-check:
   needs: [ "build" ]
   script:
     - chmod +x ./mvnw
-    - ./mvnw $MAVEN_CLI_OPTS org.owasp:dependency-check-maven:aggregate -Dformat=ALL -DfailBuildOnCVSS=11
+    - ./mvnw $MAVEN_CLI_OPTS org.owasp:dependency-check-maven:aggregate -Dformat=ALL -DfailBuildOnCVSS=7 -DnvdApiKey=$NVD_PERSONAL
     - ./mvnw $MAVEN_CLI_OPTS cyclonedx:makeAggregateBom
   artifacts:
     when: always
@@ -157,9 +157,12 @@ quality-dependency-check:
 
 quality-trivy:
   stage: quality
-  image: aquasec/trivy:latest
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [ "" ]
   needs: [ "build" ]
   script:
+    - trivy fs --no-progress --exit-code 1 --severity CRITICAL --format table .
     - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy.sarif .
     - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy.json .
   artifacts:
