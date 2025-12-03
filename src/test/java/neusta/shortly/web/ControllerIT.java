@@ -4,15 +4,15 @@ import neusta.shortly.TestcontainersConfiguration;
 import neusta.shortly.persistence.ShortLinkRepository;
 import neusta.shortly.web.dto.ShortLinkDto;
 import neusta.shortly.web.dto.StatsDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.junit.jupiter.api.BeforeEach;
 
 import java.net.URI;
 import java.time.Instant;
@@ -24,10 +24,11 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ControllerIT {
 
-    private WebTestClient webTestClient;
-
     @LocalServerPort
     int port;
+    private WebTestClient webTestClient;
+    @Autowired
+    private ShortLinkRepository repository;
 
     @BeforeEach
     void setupClient() {
@@ -35,9 +36,6 @@ class ControllerIT {
                 .baseUrl("http://localhost:" + port)
                 .build();
     }
-
-    @Autowired
-    private ShortLinkRepository repository;
 
     @Test
     void resolveShortCode() {
@@ -118,7 +116,7 @@ class ControllerIT {
         assertThat(repository.existsById(shortCode)).isFalse();
     }
 
-    private String createShortLink(String originalUrl) {
+    private String createShortLink(final String originalUrl) {
         final Instant expiresAt = Instant.now().plusSeconds(600);
         final EntityExchangeResult<String> result = webTestClient.post()
                 .uri("/api/shorten")

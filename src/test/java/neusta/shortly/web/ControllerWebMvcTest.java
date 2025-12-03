@@ -38,10 +38,10 @@ class ControllerWebMvcTest {
         @Test
         @DisplayName("liefert 302 mit Location, wenn gefunden")
         void found() {
-            ShortLink entity = ShortLink.of().shortCode("ABC123").originalUrl("https://example.org").clicks(0).ttl(null).build();
+            final ShortLink entity = ShortLink.of().shortCode("ABC123").originalUrl("https://example.org").clicks(0).ttl(null).build();
             when(shortLinkService.findById("ABC123")).thenReturn(Optional.of(entity));
 
-            ResponseEntity<Void> response = controller.resolveShortCode("ABC123");
+            final ResponseEntity<Void> response = controller.resolveShortCode("ABC123");
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FOUND);
             assertThat(response.getHeaders().getLocation()).isEqualTo(URI.create("https://example.org"));
         }
@@ -50,7 +50,7 @@ class ControllerWebMvcTest {
         @DisplayName("liefert 404, wenn nicht gefunden")
         void notFound() {
             when(shortLinkService.findById("ZZZZZZ")).thenReturn(Optional.empty());
-            ResponseEntity<Void> response = controller.resolveShortCode("ZZZZZZ");
+            final ResponseEntity<Void> response = controller.resolveShortCode("ZZZZZZ");
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
     }
@@ -61,10 +61,10 @@ class ControllerWebMvcTest {
         @Test
         @DisplayName("liefert 200 und Stats")
         void ok() {
-            ShortLink entity = ShortLink.of().shortCode("ABC123").originalUrl("https://e").clicks(5).ttl(null).build();
+            final ShortLink entity = ShortLink.of().shortCode("ABC123").originalUrl("https://e").clicks(5).ttl(null).build();
             when(shortLinkService.findById("ABC123")).thenReturn(Optional.of(entity));
 
-            ResponseEntity<?> response = controller.getStats("ABC123");
+            final ResponseEntity<?> response = controller.getStats("ABC123");
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull().hasToString("StatsDto[shortCode=ABC123, clicks=5]");
         }
@@ -73,7 +73,7 @@ class ControllerWebMvcTest {
         @DisplayName("liefert 404, wenn nicht gefunden")
         void notFound() {
             when(shortLinkService.findById("ABC123")).thenReturn(Optional.empty());
-            ResponseEntity<?> response = controller.getStats("ABC123");
+            final ResponseEntity<?> response = controller.getStats("ABC123");
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
     }
@@ -87,8 +87,8 @@ class ControllerWebMvcTest {
             when(shortLinkService.create(org.mockito.ArgumentMatchers.eq("https://example.org/x"), any())).thenReturn(
                     ShortLink.of().shortCode("NEW123").originalUrl("https://example.org/x").clicks(0).ttl(100L).build()
             );
-            ShortLinkDto dto = new ShortLinkDto("https://example.org/x", Instant.now().plusSeconds(60));
-            String result = controller.create(dto);
+            final ShortLinkDto dto = new ShortLinkDto("https://example.org/x", Instant.now().plusSeconds(60));
+            final String result = controller.create(dto);
             assertThat(result).isEqualTo("NEW123");
         }
     }
