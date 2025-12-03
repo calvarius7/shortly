@@ -13,7 +13,7 @@ spec:
     # Für lokale Entwicklung: Git-Repo URL hier eintragen
     # Beispiel: https://github.com/DEIN-USER/shortly.git
     # Für Docker Desktop lokal kannst du auch ein lokales Repo nutzen (siehe unten)
-    repoURL: https://gitlab.neusta.de/limmoor/shorly.git
+    repoURL: https://gitlab.neusta.de/limmoor/shortly.git
     targetRevision: HEAD
     path: deploy/helm/shortly
 
