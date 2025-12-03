@@ -42,7 +42,7 @@ env:
 
 redis:
   enabled: true
-  image: redis:8.4-alpine
+  image: docker-repository.intern.neusta.de/redis:8-alpine
   port: 6379
   resources: { }
   persistence:
