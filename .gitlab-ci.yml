@@ -12,6 +12,7 @@ default:
         - .m2/repository
 
 variables:
+  SHORTLY_REGISTRY: "$CI_REGISTRY/limmoor/shortly"
   MAVEN_REPO_LOCAL: "$CI_PROJECT_DIR/.m2/repository"
   MAVEN_CLI_OPTS: "--no-transfer-progress -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -B -V"
 
@@ -46,9 +47,9 @@ build-native-image:
     - mkdir -p .m2/repository
     - chmod +x ./mvnw
   script:
-    - ./mvnw $MAVEN_CLI_OPTS -DskipTests spring-boot:build-image -Pnative -Dspring-boot.build-image.imageName=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - ./mvnw $MAVEN_CLI_OPTS -DskipTests spring-boot:build-image -Pnative -Dspring-boot.build-image.imageName=$SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $SHORTLY_REGISTRY
+    - docker push $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA
   only:
     - tags
 # ---------- TEST (parallel) ----------
