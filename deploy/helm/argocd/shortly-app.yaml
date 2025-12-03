@@ -1,0 +1,47 @@
+# deploy/argocd/shortly-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shortly
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    # Für lokale Entwicklung: Git-Repo URL hier eintragen
+    # Beispiel: https://github.com/DEIN-USER/shortly.git
+    # Für Docker Desktop lokal kannst du auch ein lokales Repo nutzen (siehe unten)
+    repoURL: https://gitlab.neusta.de/limmoor/shorly.git
+    targetRevision: HEAD
+    path: deploy/helm/shortly
+
+    helm:
+      valueFiles:
+        - values.yaml
+      # Docker Desktop spezifische Overrides
+      parameters:
+        - name: image.repository
+          value: shortly
+        - name: image.tag
+          value: latest
+        - name: image.pullPolicy
+          value: Never  # Lokales Image verwenden
+        - name: service.type
+          value: NodePort
+        - name: service.nodePort
+          value: "30080"
+
+  destination:
+    # Docker Desktop K8s Cluster
+    server: https://kubernetes.default.svc
+    namespace: shortly
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true

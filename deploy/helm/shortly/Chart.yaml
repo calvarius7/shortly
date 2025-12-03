@@ -1,0 +1,6 @@
+apiVersion: v2
+name: shortly
+description: A Helm chart to deploy the Shortly app with Redis and optional ServiceMonitor
+type: application
+version: 0.1.0
+appVersion: "0.0.1"

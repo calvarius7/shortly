@@ -1,0 +1,25 @@
+# deploy/argocd/shortly-project.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: shortly-project
+  namespace: argocd
+spec:
+  description: Shortly URL Shortener Project
+
+  sourceRepos:
+    - 'https://gitlab.neusta.de/limmoor/shorly.git'  # Oder spezifische Repo-URL
+
+  destinations:
+    - namespace: shortly
+      server: https://kubernetes.default.svc
+    - namespace: monitoring
+      server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

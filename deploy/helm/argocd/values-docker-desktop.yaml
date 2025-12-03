@@ -1,0 +1,32 @@
+# deploy/argocd/values-docker-desktop.yaml
+# Diese Datei kann als zusätzliche Values-Datei in ArgoCD referenziert werden
+
+image:
+  repository: shortly
+  tag: latest
+  pullPolicy: Never  # Nutzt lokales Docker Image
+
+service:
+  type: NodePort
+  nodePort: 30080
+
+ingress:
+  enabled: false  # Für Docker Desktop meist nicht nötig
+
+redis:
+  enabled: true
+  persistence:
+    enabled: false  # Für lokale Entwicklung
+
+monitoring:
+  annotationsScrape: true
+  serviceMonitor:
+    enabled: false  # Nur wenn Prometheus Operator installiert
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
