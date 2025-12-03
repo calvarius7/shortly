@@ -8,7 +8,7 @@ spec:
   description: Shortly URL Shortener Project
 
   sourceRepos:
-    - 'https://gitlab.neusta.de/limmoor/shorly.git'  # Oder spezifische Repo-URL
+    - 'https://gitlab.neusta.de/limmoor/shortly.git'
 
   destinations:
     - namespace: shortly

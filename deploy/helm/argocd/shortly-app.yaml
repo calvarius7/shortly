@@ -20,32 +20,7 @@ spec:
     helm:
       valueFiles:
         - values.yaml
-      parameters:
-        # Shortly App Image von GitLab Registry
-        - name: image.repository
-          value: projectregistry.neusta.de/limmoor/shortly
-        - name: image.tag
-          value: latest
-        - name: image.pullPolicy
-          value: Always
-        
-        # Redis vom Docker Hub
-        - name: redis.image.repository
-          value: redis
-        - name: redis.image.tag
-          value: "7-alpine"
-        - name: redis.image.pullPolicy
-          value: IfNotPresent
-        
-        # Service
-        - name: service.type
-          value: NodePort
-        - name: service.nodePort
-          value: "30080"
-        
-        # ServiceMonitor deaktivieren
-        - name: monitoring.serviceMonitor.enabled
-          value: "true"
+        - ../argocd/values-docker-desktop.yaml
 
   destination:
     # Docker Desktop K8s Cluster

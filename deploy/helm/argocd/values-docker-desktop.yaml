@@ -1,27 +1,27 @@
 # deploy/argocd/values-docker-desktop.yaml
-# Diese Datei kann als zusätzliche Values-Datei in ArgoCD referenziert werden
+# Überschreibt values.yaml für Docker Desktop mit GitLab Registry
 
 image:
-  repository: shortly
+  repository: projectregistry.neusta.de/limmoor/shortly
   tag: latest
-  pullPolicy: Never  # Nutzt lokales Docker Image
+  pullPolicy: Always
 
 service:
   type: NodePort
   nodePort: 30080
 
 ingress:
-  enabled: false  # Für Docker Desktop meist nicht nötig
+  enabled: false
 
 redis:
   enabled: true
   persistence:
-    enabled: false  # Für lokale Entwicklung
+    enabled: false
 
 monitoring:
   annotationsScrape: true
   serviceMonitor:
-    enabled: false  # Nur wenn Prometheus Operator installiert
+    enabled: true
 
 resources:
   requests:
