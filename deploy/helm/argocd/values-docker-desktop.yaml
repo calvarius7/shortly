@@ -18,7 +18,7 @@ ingress:
 
 redis:
   enabled: true
-  image: docker-repository.intern.neusta.de/redis:8-alpine
+  image: docker-repository.intern.neusta.de/redis:latest
   persistence:
     enabled: false
 
