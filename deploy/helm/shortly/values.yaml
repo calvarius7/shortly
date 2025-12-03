@@ -7,7 +7,7 @@ image:
   pullPolicy: IfNotPresent
   # imagePullSecrets: [ ] # e.g., [{ name: regcred }]
 
-imagePullSecrets: []
+imagePullSecrets: [ ]
 
 replicaCount: 1
 
@@ -18,15 +18,15 @@ service:
 ingress:
   enabled: false
   className: ""
-  annotations: {}
+  annotations: { }
   hosts:
     - host: shortly.local
       paths:
         - path: /
           pathType: Prefix
-  tls: []
+  tls: [ ]
 
-resources: {}
+resources: { }
 #  requests:
 #    cpu: 100m
 #    memory: 128Mi
@@ -38,13 +38,13 @@ env:
   # Additional environment variables for the app
   # - name: SOME_VAR
   #   value: some-value
-  []
+  [ ]
 
 redis:
   enabled: true
-  image: redis:7.4
+  image: redis:8.4-alpine
   port: 6379
-  resources: {}
+  resources: { }
   persistence:
     enabled: false
     size: 1Gi
@@ -63,7 +63,7 @@ monitoring:
     interval: 15s
     scrapeTimeout: 10s
 
-podAnnotations: {}
-nodeSelector: {}
-tolerations: []
-affinity: {}
+podAnnotations: { }
+nodeSelector: { }
+tolerations: [ ]
+affinity: { }
