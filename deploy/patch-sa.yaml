@@ -1,3 +1,10 @@
+#kubectl create secret docker-registry dockerhub-registry \
+#  --namespace shortly \
+#  --docker-server=https://index.docker.io/v1/ \
+#  --docker-username=DEIN_DOCKERHUB_USERNAME \
+#  --docker-password=DEIN_ACCESS_TOKEN \
+#  --docker-email=deine@email.de
+#  kubectl patch serviceaccount default -n shortly --patch-file .\deploy\patch-sa.yaml
 imagePullSecrets:
   - name: dockerhub-registry
   - name: gitlab-registry
