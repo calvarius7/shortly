@@ -1,5 +1,3 @@
-image: eclipse-temurin:25-jdk-jammy
-
 default:
   tags:
     - docker
@@ -23,15 +21,32 @@ stages:
   - build
   - test
   - quality
-  - package
+  - deploy
+
+
+.eco-ci-base:
+  image: eclipse-temurin:25-jdk-jammy
+  variables:
+    ECO_CI_SEND_DATA: "false"
+    ECO_CI_CO2_GRID_INTENSITY_API_TOKEN: "HIfF0HcByBuFyyLHmGlO"
+    ECO_CI_CO2_CALCULATION_METHOD: "location-based"
+    ECO_CI_JSON_OUTPUT: "true"
+  before_script:
+    - apt-get update
+    - apt-get install -y git jq curl
+    - update-ca-certificates
+    - !reference [ .start_measurement, script ]
+    - mkdir -p .m2/repository
+    - chmod +x ./mvnw
+  after_script:
+    - !reference [ .get_measurement, script ]
+    - !reference [ .display_results, script ]
 
 # ---------- BUILD ----------
 
 build:
+  extends: .eco-ci-base
   stage: build
-  before_script:
-    - mkdir -p .m2/repository
-    - chmod +x ./mvnw
   script:
     - ./mvnw $MAVEN_CLI_OPTS -DskipTests package
   artifacts:
@@ -40,25 +55,13 @@ build:
       - target/*.jar
       - target/classes
 
-build-native-image:
-  stage: package
-  needs: [ "unit-tests", "integration-tests" ]
-  before_script:
-    - mkdir -p .m2/repository
-    - chmod +x ./mvnw
-  script:
-    - ./mvnw $MAVEN_CLI_OPTS -DskipTests spring-boot:build-image -Pnative -Dspring-boot.build-image.imageName=$SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $SHORTLY_REGISTRY
-    - docker push $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA
-  only:
-    - tags
 # ---------- TEST (parallel) ----------
 
 unit-tests:
+  extends: .eco-ci-base
   stage: test
   needs: [ "build" ]
   script:
-    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS -DskipITs=true verify
   artifacts:
     when: always
@@ -75,10 +78,10 @@ unit-tests:
       - target/shortly
 
 integration-tests:
+  extends: .eco-ci-base
   stage: test
   needs: [ "build" ]
   script:
-    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS -DfailIfNoTests=false test-compile failsafe:integration-test failsafe:verify
   artifacts:
     when: always
@@ -90,10 +93,10 @@ integration-tests:
       - target/failsafe-reports/*
 
 mutation-tests:
+  extends: .eco-ci-base
   stage: test
   needs: [ "build" ]
   script:
-    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS -Dpitest.failWhenNoMutations=false -DskipTests org.pitest:pitest-maven:mutationCoverage
   artifacts:
     when: always
@@ -117,10 +120,10 @@ mutation-tests:
 #      - target/checkstyle*.xml
 
 quality-pmd:
+  extends: .eco-ci-base
   stage: quality
   needs: [ "build" ]
   script:
-    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS pmd:check
   artifacts:
     when: always
@@ -130,10 +133,10 @@ quality-pmd:
       - target/site/pmd.html
 
 quality-spotbugs:
+  extends: .eco-ci-base
   stage: quality
   needs: [ "build" ]
   script:
-    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS com.github.spotbugs:spotbugs-maven-plugin:check
   artifacts:
     when: always
@@ -143,10 +146,10 @@ quality-spotbugs:
       - target/spotbugsHtml.html
 
 quality-dependency-check:
+  extends: .eco-ci-base
   stage: quality
   needs: [ "build" ]
   script:
-    - chmod +x ./mvnw
     - ./mvnw $MAVEN_CLI_OPTS org.owasp:dependency-check-maven:aggregate -Dformat=ALL -DfailBuildOnCVSS=9 -DnvdApiKey=$NVD_PERSONAL
     - ./mvnw $MAVEN_CLI_OPTS cyclonedx:makeAggregateBom
   artifacts:
@@ -172,3 +175,53 @@ quality-trivy:
     paths:
       - trivy.sarif
       - trivy.json
+
+# ---------- DEPLOY ----------
+
+build-native-image:
+  extends: .eco-ci-base
+  stage: deploy
+  needs: [ "unit-tests", "integration-tests" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -DskipTests spring-boot:build-image -Pnative -Dspring-boot.build-image.imageName=$SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA
+    - docker save $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA -o native-image.tar
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - native-image.tar
+  only:
+    - tags
+
+scan-native-image:
+  stage: deploy
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [ "" ]
+  needs: [ "build-native-image" ]
+  script:
+    - trivy image --input native-image.tar --no-progress --exit-code 1 --severity CRITICAL --format table
+    - trivy image --input native-image.tar --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy-image.sarif
+    - trivy image --input native-image.tar --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy-image.json
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - trivy-image.sarif
+      - trivy-image.json
+  only:
+    - tags
+
+push-native-image:
+  extends: .eco-ci-base
+  stage: deploy
+  needs: [ "scan-native-image", "build-native-image" ]
+  script:
+    - docker load -i native-image.tar
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker tag $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA $SHORTLY_REGISTRY:latest
+    - docker tag $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA $SHORTLY_REGISTRY:$CI_COMMIT_TAG
+    - docker push $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA
+    - docker push $SHORTLY_REGISTRY:latest
+    - docker push $SHORTLY_REGISTRY:$CI_COMMIT_TAG
+  only:
+    - tags
