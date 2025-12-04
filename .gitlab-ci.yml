@@ -10,7 +10,7 @@ default:
         - .m2/repository
 
 variables:
-  SHORTLY_REGISTRY: "$CI_REGISTRY/limmoor/shortly"
+  CI_REGISTRY_IMAGE: "$CI_REGISTRY/$CI_PROJECT_PATH"
   MAVEN_REPO_LOCAL: "$CI_PROJECT_DIR/.m2/repository"
   MAVEN_CLI_OPTS: "--no-transfer-progress -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -B -V"
 
@@ -162,7 +162,7 @@ quality-dependency-check:
 quality-trivy:
   stage: quality
   image:
-    name: aquasec/trivy:latest
+    name: aquasec/trivy:latest # TODO add eco-cli
     entrypoint: [ "" ]
   needs: [ "build" ]
   script:
@@ -178,50 +178,46 @@ quality-trivy:
 
 # ---------- DEPLOY ----------
 
-build-native-image:
-  extends: .eco-ci-base
+deploy-native-image:
+  image: docker-repository.intern.neusta.de/tn-docker:latest
+  variables:
+    DOCKER_BUILDKIT: 1
   stage: deploy
-  needs: [ "unit-tests", "integration-tests" ]
+  # needs: [ "unit-tests", "integration-tests" ]
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
-    - ./mvnw $MAVEN_CLI_OPTS -DskipTests spring-boot:build-image -Pnative -Dspring-boot.build-image.imageName=$SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA
-    - docker save $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA -o native-image.tar
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - native-image.tar
+    # Docker Build mit BuildKit und Cache
+    - docker build --progress=plain --pull --no-cache \
+      --build-arg BUILDKIT_INLINE_CACHE=1 \
+      -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" .
+    - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    # Push latest Tag
+    - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" "$CI_REGISTRY_IMAGE:latest"
+    - docker push "$CI_REGISTRY_IMAGE:latest"
   only:
     - tags
 
-scan-native-image:
+scan-image-remote:
   stage: deploy
   image:
     name: aquasec/trivy:latest
     entrypoint: [ "" ]
-  needs: [ "build-native-image" ]
+  needs: [ "deploy-native-image" ]
   script:
-    - trivy image --input native-image.tar --no-progress --exit-code 1 --severity CRITICAL --format table
-    - trivy image --input native-image.tar --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy-image.sarif
-    - trivy image --input native-image.tar --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy-image.json
+    - export TRIVY_USERNAME="$CI_REGISTRY_USER"
+    - export TRIVY_PASSWORD="$CI_REGISTRY_PASSWORD"
+
+    - trivy image --image-src registry --no-progress --exit-code 1 --severity CRITICAL $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - trivy image --image-src registry --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy-image.sarif $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - trivy image --image-src registry --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json  -o trivy-image.json  $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   artifacts:
     when: always
     expire_in: 1 day
     paths:
       - trivy-image.sarif
       - trivy-image.json
-  only:
-    - tags
-
-push-native-image:
-  extends: .eco-ci-base
-  stage: deploy
-  needs: [ "scan-native-image", "build-native-image" ]
-  script:
-    - docker load -i native-image.tar
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker tag $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA $SHORTLY_REGISTRY:latest
-    - docker tag $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA $SHORTLY_REGISTRY:$CI_COMMIT_TAG
-    - docker push $SHORTLY_REGISTRY:$CI_COMMIT_SHORT_SHA
-    - docker push $SHORTLY_REGISTRY:latest
-    - docker push $SHORTLY_REGISTRY:$CI_COMMIT_TAG
   only:
     - tags
