@@ -14,11 +14,11 @@ RUN tar -xf /tmp/upx.tar.xz -C /tmp && \
     mv /tmp/upx-${UPX_VERSION}-amd64_linux/upx /usr/bin/upx && \
     chmod +x /usr/bin/upx
 
-COPY .mvn/ .mvn/
+COPY .mvn .mvn/
 COPY mvnw pom.xml ./
 RUN chmod +x mvnw && ./mvnw -B dependency:go-offline
 
-COPY src src
+COPY ../src src
 
 # nativ kompilieren mit StripDebugInfo (Basis-Bereinigung)
 RUN ./mvnw -Pnative native:compile -DskipTests \
