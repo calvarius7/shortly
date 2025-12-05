@@ -1,5 +1,10 @@
 package neusta.shortly.web;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import neusta.shortly.model.ShortLink;
@@ -16,13 +21,24 @@ import java.net.URI;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
 @RequiredArgsConstructor
 @Validated
 public class Controller {
 
     private final ShortLinkService shortLinkService;
 
+
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "302",
+                    description = "Weiterleitung zur Original-URL",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Redirect-Beispiel",
+                                    value = "{\"message\":\"Redirect\"}",
+                                    description = "Der eigentliche Redirect erfolgt über den Location-Header"))),
+            @ApiResponse(responseCode = "404"),
+            @ApiResponse(responseCode = "400")})
     @GetMapping("/{shortCode}")
     public ResponseEntity<Void> resolveShortCode(@PathVariable
                                                  @ValidShortCode final String shortCode) {
@@ -35,6 +51,15 @@ public class Controller {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Statistiken erfolgreich abgerufen",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = StatsDto.class))),
+            @ApiResponse(responseCode = "404"),
+            @ApiResponse(responseCode = "400")})
     @GetMapping("/stats/{shortCode}")
     public ResponseEntity<StatsDto> getStats(@PathVariable
                                              @ValidShortCode final String shortCode) {
@@ -47,6 +72,9 @@ public class Controller {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "400")})
     @PostMapping("/shorten")
     @ResponseStatus(HttpStatus.CREATED)
     public String create(@Valid @RequestBody final ShortLinkDto inputDto) {
@@ -54,6 +82,10 @@ public class Controller {
                 .getShortCode();
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "404"),
+            @ApiResponse(responseCode = "400")})
     @DeleteMapping("/{shortCode}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable
