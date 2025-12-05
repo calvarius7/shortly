@@ -13,169 +13,169 @@ variables:
   CI_REGISTRY_IMAGE: "$CI_REGISTRY/$CI_PROJECT_PATH"
   MAVEN_REPO_LOCAL: "$CI_PROJECT_DIR/.m2/repository"
   MAVEN_CLI_OPTS: "--no-transfer-progress -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -B -V"
+  ECO_CI_SEND_DATA: "false"
+  ECO_CI_CO2_GRID_INTENSITY_API_TOKEN: "HIfF0HcByBuFyyLHmGlO"
+  ECO_CI_CO2_CALCULATION_METHOD: "location-based"
+  ECO_CI_JSON_OUTPUT: "true"
 
 include:
   - remote: 'https://raw.githubusercontent.com/green-coding-solutions/eco-ci-energy-estimation/main/eco-ci-gitlab.yml'
 
 stages:
+  - build
+  - test
+  - quality
   - deploy
-#  - build
-#  - test
-#  - quality
-#  -
-#.eco-ci-base:
-#  image: eclipse-temurin:25-jdk-jammy
-#  variables:
-#    ECO_CI_SEND_DATA: "false"
-#    ECO_CI_CO2_GRID_INTENSITY_API_TOKEN: "HIfF0HcByBuFyyLHmGlO"
-#    ECO_CI_CO2_CALCULATION_METHOD: "location-based"
-#    ECO_CI_JSON_OUTPUT: "true"
-#  before_script:
-#    - apt-get update
-#    - apt-get install -y git jq curl
-#    - update-ca-certificates
-#    - !reference [ .start_measurement, script ]
-#    - mkdir -p .m2/repository
+
+.eco-ci-base:
+  image: eclipse-temurin:25-jdk-jammy
+  before_script:
+    - apt-get update
+    - apt-get install -y git jq curl
+    - update-ca-certificates
+    - !reference [ .start_measurement, script ]
+    - mkdir -p .m2/repository
+    - chmod +x ./mvnw
+  after_script:
+    - !reference [ .get_measurement, script ]
+    - !reference [ .display_results, script ]
+
+# ---------- BUILD ----------
+
+build:
+  extends: .eco-ci-base
+  stage: build
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -DskipTests package
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - target/*.jar
+      - target/classes
+
+# ---------- TEST (parallel) ----------
+
+unit-tests:
+  extends: .eco-ci-base
+  stage: test
+  needs: [ "build" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -DskipITs=true verify
+  artifacts:
+    when: always
+    expire_in: 1 day
+    reports:
+      junit:
+        - target/surefire-reports/*.xml
+      coverage_report:
+        coverage_format: jacoco
+        path: target/site/jacoco/jacoco.xml
+    paths:
+      - target/surefire-reports/*
+      - target/*.jar
+      - target/shortly
+
+integration-tests:
+  extends: .eco-ci-base
+  stage: test
+  needs: [ "build" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -DfailIfNoTests=false test-compile failsafe:integration-test failsafe:verify
+  artifacts:
+    when: always
+    expire_in: 1 day
+    reports:
+      junit:
+        - target/failsafe-reports/TEST-*.xml
+    paths:
+      - target/failsafe-reports/*
+
+mutation-tests:
+  extends: .eco-ci-base
+  stage: test
+  needs: [ "build" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -Dpitest.failWhenNoMutations=false -DskipTests org.pitest:pitest-maven:mutationCoverage
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - target/pit-reports/**
+
+# ---------- QUALITY (parallel) ----------
+
+# i don't like checkstyle, so i disabled it for now because who's gonna stop me?
+#quality-checkstyle:
+#  stage: quality
+#  needs: [ "build" ]
+#  script:
 #    - chmod +x ./mvnw
-#  after_script:
-#    - !reference [ .get_measurement, script ]
-#    - !reference [ .display_results, script ]
-#
-## ---------- BUILD ----------
-#
-#build:
-#  extends: .eco-ci-base
-#  stage: build
-#  script:
-#    - ./mvnw $MAVEN_CLI_OPTS -DskipTests package
-#  artifacts:
-#    expire_in: 1 day
-#    paths:
-#      - target/*.jar
-#      - target/classes
-#
-## ---------- TEST (parallel) ----------
-#
-#unit-tests:
-#  extends: .eco-ci-base
-#  stage: test
-#  needs: [ "build" ]
-#  script:
-#    - ./mvnw $MAVEN_CLI_OPTS -DskipITs=true verify
-#  artifacts:
-#    when: always
-#    expire_in: 1 day
-#    reports:
-#      junit:
-#        - target/surefire-reports/*.xml
-#      coverage_report:
-#        coverage_format: jacoco
-#        path: target/site/jacoco/jacoco.xml
-#    paths:
-#      - target/surefire-reports/*
-#      - target/*.jar
-#      - target/shortly
-#
-#integration-tests:
-#  extends: .eco-ci-base
-#  stage: test
-#  needs: [ "build" ]
-#  script:
-#    - ./mvnw $MAVEN_CLI_OPTS -DfailIfNoTests=false test-compile failsafe:integration-test failsafe:verify
-#  artifacts:
-#    when: always
-#    expire_in: 1 day
-#    reports:
-#      junit:
-#        - target/failsafe-reports/TEST-*.xml
-#    paths:
-#      - target/failsafe-reports/*
-#
-#mutation-tests:
-#  extends: .eco-ci-base
-#  stage: test
-#  needs: [ "build" ]
-#  script:
-#    - ./mvnw $MAVEN_CLI_OPTS -Dpitest.failWhenNoMutations=false -DskipTests org.pitest:pitest-maven:mutationCoverage
+#    - ./mvnw $MAVEN_CLI_OPTS checkstyle:check
 #  artifacts:
 #    when: always
 #    expire_in: 1 day
 #    paths:
-#      - target/pit-reports/**
-#
-## ---------- QUALITY (parallel) ----------
-#
-##quality-checkstyle:
-##  stage: quality
-##  needs: [ "build" ]
-##  script:
-##    - chmod +x ./mvnw
-##    - ./mvnw $MAVEN_CLI_OPTS checkstyle:check
-##  artifacts:
-##    when: always
-##    expire_in: 1 day
-##    paths:
-##      - target/checkstyle-result.xml
-##      - target/checkstyle*.xml
-#
-#quality-pmd:
-#  extends: .eco-ci-base
-#  stage: quality
-#  needs: [ "build" ]
-#  script:
-#    - ./mvnw $MAVEN_CLI_OPTS pmd:check
-#  artifacts:
-#    when: always
-#    expire_in: 1 day
-#    paths:
-#      - target/pmd.xml
-#      - target/site/pmd.html
-#
-#quality-spotbugs:
-#  extends: .eco-ci-base
-#  stage: quality
-#  needs: [ "build" ]
-#  script:
-#    - ./mvnw $MAVEN_CLI_OPTS com.github.spotbugs:spotbugs-maven-plugin:check
-#  artifacts:
-#    when: always
-#    expire_in: 1 day
-#    paths:
-#      - target/spotbugsXml.xml
-#      - target/spotbugsHtml.html
-#
-#quality-dependency-check:
-#  extends: .eco-ci-base
-#  stage: quality
-#  needs: [ "build" ]
-#  script:
-#    - ./mvnw $MAVEN_CLI_OPTS org.owasp:dependency-check-maven:aggregate -Dformat=ALL -DfailBuildOnCVSS=9 -DnvdApiKey=$NVD_PERSONAL
-#    - ./mvnw $MAVEN_CLI_OPTS cyclonedx:makeAggregateBom
-#  artifacts:
-#    when: always
-#    expire_in: 1 day
-#    paths:
-#      - target/dependency-check-report.*
-#      - target/bom.xml
-#
-#quality-trivy:
-#  stage: quality
-#  image:
-#    name: aquasec/trivy:latest # TODO add eco-cli
-#    entrypoint: [ "" ]
-#  needs: [ "build" ]
-#  script:
-#    - trivy fs --no-progress --exit-code 1 --severity CRITICAL --format table .
-#    - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy.sarif .
-#    - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy.json .
-#  artifacts:
-#    when: always
-#    expire_in: 1 day
-#    paths:
-#      - trivy.sarif
-#      - trivy.json
-#
-## ---------- DEPLOY ----------
+#      - target/checkstyle-result.xml
+#      - target/checkstyle*.xml
+
+quality-pmd:
+  extends: .eco-ci-base
+  stage: quality
+  needs: [ "build" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS pmd:check
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - target/pmd.xml
+      - target/site/pmd.html
+
+quality-spotbugs:
+  extends: .eco-ci-base
+  stage: quality
+  needs: [ "build" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS com.github.spotbugs:spotbugs-maven-plugin:check
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - target/spotbugsXml.xml
+      - target/spotbugsHtml.html
+
+quality-dependency-check:
+  extends: .eco-ci-base
+  stage: quality
+  needs: [ "build" ]
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS org.owasp:dependency-check-maven:aggregate -Dformat=ALL -DfailBuildOnCVSS=9 -DnvdApiKey=$NVD_PERSONAL
+    - ./mvnw $MAVEN_CLI_OPTS cyclonedx:makeAggregateBom
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - target/dependency-check-report.*
+      - target/bom.xml
+
+quality-trivy:
+  stage: quality
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [ "" ]
+  needs: [ "build" ]
+  script:
+    - trivy fs --no-progress --exit-code 1 --severity CRITICAL --format table .
+    - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy.sarif .
+    - trivy fs --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json -o trivy.json .
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - trivy.sarif
+      - trivy.json
+
+# ---------- DEPLOY ----------
 
 deploy-native-image:
   image: docker-repository.intern.neusta.de/tn-docker:latest
@@ -184,6 +184,10 @@ deploy-native-image:
   stage: deploy
   # needs: [ "unit-tests", "integration-tests" ]
   before_script:
+    - apt-get update
+    - apt-get install -y git jq curl
+    - update-ca-certificates
+    - !reference [ .start_measurement, script ]
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
     - |
@@ -192,13 +196,16 @@ deploy-native-image:
         --pull \
         --no-cache \
         --provenance=false \
-        -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" \
+        -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" \      
         -t "$CI_REGISTRY_IMAGE:latest" \
         .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
     - docker push "$CI_REGISTRY_IMAGE:latest"
+  after_script:
+    - !reference [ .get_measurement, script ]
+    - !reference [ .display_results, script ]
   only:
-    - merge_requests
+    - tags
 
 scan-image-remote:
   stage: deploy
@@ -206,13 +213,16 @@ scan-image-remote:
     name: aquasec/trivy:latest
     entrypoint: [ "" ]
   needs: [ "deploy-native-image" ]
+  variables:
+    IMAGE_REF: "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
   script:
     - export TRIVY_USERNAME="$CI_REGISTRY_USER"
     - export TRIVY_PASSWORD="$CI_REGISTRY_PASSWORD"
 
-    - trivy image --image-src docker --no-progress --ignore-unfixed --exit-code 1 --severity CRITICAL $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-    - trivy image --image-src docker --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy-image.sarif $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-    - trivy image --image-src docker --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json  -o trivy-image.json  $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    # fail fast on critical vulnerabilities but ignore will_not_fix vulnerabilities e.g. CVE-2023-45853
+    - trivy image --image-src docker --no-progress --ignore-unfixed --exit-code 1 --severity CRITICAL $IMAGE_REF
+    - trivy image --image-src docker --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy-image.sarif $IMAGE_REF
+    - trivy image --image-src docker --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json  -o trivy-image.json  $IMAGE_REF
   artifacts:
     when: always
     expire_in: 1 day
@@ -220,4 +230,4 @@ scan-image-remote:
       - trivy-image.sarif
       - trivy-image.json
   only:
-    - merge_requests
+    - tags
