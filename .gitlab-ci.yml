@@ -188,14 +188,14 @@ deploy-native-image:
   script:
     - |
       docker build \
-      --progress=plain \
-      --pull \
-      --no-cache \
-      --build-arg BUILDKIT_INLINE_CACHE=1 \
-      --output=type=image,push=true \
-      -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" \
-      -t "$CI_REGISTRY_IMAGE:latest" \
-      .
+        --progress=plain \
+        --pull \
+        --no-cache \
+        -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" \
+        -t "$CI_REGISTRY_IMAGE:latest" \
+        .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE:latest"
   only:
     - merge_requests
 
@@ -209,9 +209,9 @@ scan-image-remote:
     - export TRIVY_USERNAME="$CI_REGISTRY_USER"
     - export TRIVY_PASSWORD="$CI_REGISTRY_PASSWORD"
 
-    - trivy image --image-src registry --no-progress --exit-code 1 --severity CRITICAL $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-    - trivy image --image-src registry --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy-image.sarif $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-    - trivy image --image-src registry --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json  -o trivy-image.json  $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - trivy image --image-src docker --no-progress --exit-code 1 --severity CRITICAL $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - trivy image --image-src docker --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy-image.sarif $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - trivy image --image-src docker --no-progress --exit-code 0 --severity HIGH,CRITICAL --format json  -o trivy-image.json  $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   artifacts:
     when: always
     expire_in: 1 day
