@@ -184,8 +184,7 @@ deploy-native-image:
   stage: deploy
   # needs: [ "unit-tests", "integration-tests" ]
   before_script:
-    - apt-get update
-    - apt-get install -y git jq curl
+    - apk add --no-cache git jq curl
     - update-ca-certificates
     - !reference [ .start_measurement, script ]
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
