@@ -194,7 +194,6 @@ deploy-native-image:
       --build-arg BUILDKIT_INLINE_CACHE=1 \
       --output=type=image,push=true \
       -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" \
-      -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" \
       -t "$CI_REGISTRY_IMAGE:latest" \
       .
   only:
