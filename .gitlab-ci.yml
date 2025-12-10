@@ -53,6 +53,9 @@ build:
     paths:
       - target/*.jar
       - target/classes
+  only:
+    changes:
+      - shortly_java/**/*
 
 # ---------- TEST (parallel) ----------
 
