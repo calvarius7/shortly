@@ -23,6 +23,8 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Validated
+@CrossOrigin(allowedHeaders = "*", origins = "*")
+@RequestMapping("/api")
 public class Controller {
 
     private final ShortLinkService shortLinkService;

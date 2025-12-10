@@ -1,0 +1,30 @@
+<div class="container">
+  <h1>Shortly - Länger ist nicht immer besser</h1>
+  @if (!result()) {
+    <label class="visually-hidden" for="url-input">URL zum kürzen eingeben</label>
+    <input
+      (ngModelChange)="urlToShorten.set($event)"
+      [ngModel]="urlToShorten()"
+      aria-describedby="error-message"
+      id="url-input"
+      placeholder="URL zum kürzen eingeben"
+      type="text">
+    <button (click)="createPost()" [disabled]="loading()">Jetzt kürzen</button>
+  }
+  @if (loading()) {
+    <p aria-live="polite">Wird verkürzt...</p>
+  }
+  @if (error()) {
+    <p class="error-message" id="error-message" role="alert">{{ error() }}</p>
+  }
+  @if (result()) {
+    <label for="url-copy">Deine gekürzte URL: </label>
+    <input
+      aria-describedby="error-message"
+      disabled
+      id="url-copy"
+      type="text"
+      value="{{ result()!.shortenedUrl }}">
+    <button (click)="copy()" id="url-copy-button">Jetzt kopieren</button>
+  }
+</div>
