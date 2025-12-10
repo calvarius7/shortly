@@ -78,6 +78,10 @@ unit-tests:
       - target/surefire-reports/*
       - target/*.jar
       - target/shortly
+  only:
+    changes:
+      - shortly_java/**/*
+
 
 integration-tests:
   extends: .eco-ci-base
@@ -93,6 +97,10 @@ integration-tests:
         - target/failsafe-reports/TEST-*.xml
     paths:
       - target/failsafe-reports/*
+  only:
+    changes:
+      - shortly_java/**/*
+
 
 mutation-tests:
   extends: .eco-ci-base
@@ -105,6 +113,9 @@ mutation-tests:
     expire_in: 1 day
     paths:
       - target/pit-reports/**
+  only:
+    changes:
+      - shortly_java/**/*
 
 # ---------- QUALITY (parallel) ----------
 
@@ -134,6 +145,9 @@ quality-pmd:
     paths:
       - target/pmd.xml
       - target/site/pmd.html
+  only:
+    changes:
+      - shortly_java/**/*
 
 quality-spotbugs:
   extends: .eco-ci-base
@@ -147,6 +161,9 @@ quality-spotbugs:
     paths:
       - target/spotbugsXml.xml
       - target/spotbugsHtml.html
+  only:
+    changes:
+      - shortly_java/**/*
 
 quality-dependency-check:
   extends: .eco-ci-base
@@ -161,6 +178,9 @@ quality-dependency-check:
     paths:
       - target/dependency-check-report.*
       - target/bom.xml
+  only:
+    changes:
+      - shortly_java/**/*
 
 quality-trivy:
   stage: quality
@@ -178,6 +198,9 @@ quality-trivy:
     paths:
       - trivy.sarif
       - trivy.json
+  only:
+    changes:
+      - shortly_java/**/*
 
 # ---------- DEPLOY ----------
 
