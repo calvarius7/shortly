@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>neusta</groupId>
-    <artifactId>shortly</artifactId>
+    <artifactId>shortly_java</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>shortly</name>
     <description>shortly</description>
