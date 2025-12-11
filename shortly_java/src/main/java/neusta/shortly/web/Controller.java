@@ -24,11 +24,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Validated
 @CrossOrigin(allowedHeaders = "*", origins = "*")
-@RequestMapping("/api")
+@RequestMapping("")
 public class Controller {
 
     private final ShortLinkService shortLinkService;
-
 
     @ApiResponses({
             @ApiResponse(
@@ -62,7 +61,7 @@ public class Controller {
                             schema = @Schema(implementation = StatsDto.class))),
             @ApiResponse(responseCode = "404"),
             @ApiResponse(responseCode = "400")})
-    @GetMapping("/stats/{shortCode}")
+    @GetMapping("/api/stats/{shortCode}")
     public ResponseEntity<StatsDto> getStats(@PathVariable
                                              @ValidShortCode final String shortCode) {
         final Optional<ShortLink> result = shortLinkService.findById(shortCode);
@@ -77,7 +76,7 @@ public class Controller {
     @ApiResponses({
             @ApiResponse(responseCode = "201"),
             @ApiResponse(responseCode = "400")})
-    @PostMapping("/shorten")
+    @PostMapping("/api/shorten")
     @ResponseStatus(HttpStatus.CREATED)
     public String create(@Valid @RequestBody final ShortLinkDto inputDto) {
         return shortLinkService.create(inputDto.url(), inputDto.expiresAt())
@@ -88,7 +87,7 @@ public class Controller {
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "404"),
             @ApiResponse(responseCode = "400")})
-    @DeleteMapping("/{shortCode}")
+    @DeleteMapping("/api/{shortCode}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable
                        @ValidShortCode final String shortCode) {

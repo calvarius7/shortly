@@ -2,34 +2,64 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "shortly.fullname" . }}
+  name: {{ include "shortly.fullname" . }}-ingress
   labels:
     {{- include "shortly.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+    component: ingress
   annotations:
+    {{- if .Values.ingress.className }}
+    kubernetes.io/ingress.class: {{ .Values.ingress.className | quote }}
+    {{- end }}
+    # Regex-Matching für Shortcodes aktivieren
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # Höhere Priority für Shortcode-Pattern
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- end }}
 spec:
   {{- if .Values.ingress.className }}
   ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
   {{- end }}
   rules:
     {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            pathType: {{ .pathType }}
+          # Shortcode-Pattern: Exakt 6 alphanumerische Zeichen → Backend
+          # WICHTIG: Muss VOR dem Prefix-Path stehen!
+          - path: /([A-Za-z0-9]{6})$
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ include "shortly.fullname" $ }}
+                name: {{ include "shortly.fullname" $ }}-backend
                 port:
-                  number: {{ $.Values.service.port }}
-          {{- end }}
+                  number: {{ $.Values.backend.service.port }}
+          # API-Endpoints → Backend
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "shortly.fullname" $ }}-backend
+                port:
+                  number: {{ $.Values.backend.service.port }}
+          # Alles andere → Frontend (Angular SPA)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "shortly.fullname" $ }}-frontend
+                port:
+                  number: {{ $.Values.frontend.service.port }}
     {{- end }}
-  {{- if .Values.ingress.tls }}
-  tls:
-    {{- toYaml .Values.ingress.tls | nindent 4 }}
-  {{- end }}
 {{- end }}
