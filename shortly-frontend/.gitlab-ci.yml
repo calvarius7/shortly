@@ -1,13 +1,14 @@
 variables:
-  FRONTEND_IMAGE_NAME: "$CI_REGISTRY/$CI_PROJECT_PATH-angular"
+  FRONTEND_IMAGE_NAME: "$CI_REGISTRY/$CI_PROJECT_PATH-frontend"
 
 frontend:lint:
   image: node:20-alpine
   stage: test
   before_script:
     - apk add --no-cache git
-    - cd ./shortly_angular
+    - cd ./shortly-frontend
     - npm ci --no-audit --no-fund
+    - npx --yes eslint --version >/dev/null 2>&1 || npm i -D eslint
   script:
     - npm run lint
   only:
@@ -26,7 +27,7 @@ frontend:lighthouse:
   needs: [ "frontend:lint" ]
   before_script:
     - apk add --no-cache nodejs npm chromium nss
-    - cd ./shortly_angular
+    - cd ./shortly-frontend
     # Lokales Build des Frontend-Images (kein Push)
     - docker build --progress=plain --pull --no-cache --provenance=false -t shortly-frontend:ci .
     # Container starten
@@ -73,7 +74,7 @@ frontend:deploy:
   before_script:
     - apk add --no-cache git jq curl coreutils
     - !reference [ .start_measurement, script ]
-    - cd ./shortly_angular
+    - cd ./shortly-frontend
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
     - |

@@ -25,8 +25,7 @@ FROM nginx:alpine AS runtime
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built artifacts from the builder stage
-# Angular 17+ default output path: dist/<project>/browser
-COPY --from=builder /app/dist/shortly_angular/browser /usr/share/nginx/html
+COPY --from=builder /app/dist/shortly-frontend/browser /usr/share/nginx/html
 
 EXPOSE 80
 
