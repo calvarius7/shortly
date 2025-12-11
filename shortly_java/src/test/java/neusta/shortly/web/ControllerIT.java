@@ -45,7 +45,7 @@ class ControllerIT {
 
         // act + assert: resolving returns 302 with Location header
         webTestClient.get()
-                .uri("/api/{shortCode}", shortCode)
+                .uri("/{shortCode}", shortCode)
                 .exchange()
                 .expectStatus().isFound()
                 .expectHeader().valueEquals(LOCATION, URI.create(originalUrl).toString());
