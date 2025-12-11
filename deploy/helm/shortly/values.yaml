@@ -8,7 +8,7 @@ frontend:
   enabled: true
   image:
     # Eigenes Frontend-Image mit Angular-Build und NGINX
-    repository: shortly-fe
+    repository: shortly-frontend
     tag: "latest"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
@@ -18,7 +18,7 @@ frontend:
     type: ClusterIP
     port: 80
 
-  # Für Production: Eigenes Docker-Image verwenden (siehe shortly-fe/Dockerfile)
+  # Für Production: Eigenes Docker-Image verwenden (siehe shortly-frontend/Dockerfile)
   # ConfigMap-basierter Deployment-Ansatz wird NICHT verwendet
   staticFiles:
     useConfigMap: false
@@ -61,7 +61,7 @@ frontend:
 backend:
   enabled: true
   image:
-    repository: shortly
+    repository: shortly-java
     tag: "latest"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
