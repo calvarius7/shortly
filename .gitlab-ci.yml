@@ -12,6 +12,6 @@ variables:
 
 include:
   - local: shortly_java/.gitlab-ci.yml
-  - local: shortly_angular/.gitlab-ci.yml
+  - local: shortly-frontend/.gitlab-ci.yml
   - remote: 'https://raw.githubusercontent.com/green-coding-solutions/eco-ci-energy-estimation/main/eco-ci-gitlab.yml'
 
