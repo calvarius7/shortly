@@ -68,6 +68,7 @@ class ControllerIT {
                 .expectStatus().isOk()
                 .expectBody(StatsDto.class)
                 .value(dto -> {
+                    assertThat(dto).isNotNull();
                     assertThat(dto.shortCode()).isEqualTo(shortCode);
                     assertThat(dto.clicks()).isEqualTo(1); // first read increments to 1
                 });

@@ -44,6 +44,7 @@ class GlobalExceptionHandlerTest {
     @Nested
     @DisplayName("handleConstraintViolations")
     class ConstraintViolations {
+        @SuppressWarnings("unchecked")
         @Test
         @DisplayName("aggregiert ConstraintViolation-Messages")
         void aggregatesConstraintViolationMessages() {
