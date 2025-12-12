@@ -19,9 +19,6 @@ frontend:lint:
       @angular-eslint/template-parser \ || true
   script:
     - npm run lint
-  only:
-    - merge_requests
-    - branches
 
 # ------------------------------------------
 # LIGHTHOUSE JOB (Branches/MRs, ohne Backend)
