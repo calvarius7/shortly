@@ -26,7 +26,7 @@ export interface ControllerServiceInterface {
     /**
      * 
      * 
-     * @endpoint delete /{shortCode}
+     * @endpoint delete /api/{shortCode}
      * @param shortCode 
      */
     _delete(shortCode: string, extraHttpRequestParams?: any): Observable<{}>;
@@ -34,7 +34,7 @@ export interface ControllerServiceInterface {
     /**
      * 
      * 
-     * @endpoint post /shorten
+     * @endpoint post /api/shorten
      * @param shortLinkDto 
      */
     create(shortLinkDto: ShortLinkDto, extraHttpRequestParams?: any): Observable<string>;
@@ -42,7 +42,7 @@ export interface ControllerServiceInterface {
     /**
      * 
      * 
-     * @endpoint get /stats/{shortCode}
+     * @endpoint get /api/stats/{shortCode}
      * @param shortCode 
      */
     getStats(shortCode: string, extraHttpRequestParams?: any): Observable<StatsDto>;

@@ -11,7 +11,7 @@
     }
   ],
   "paths": {
-    "/shorten": {
+    "/api/shorten": {
       "post": {
         "tags": [
           "controller"
@@ -31,7 +31,7 @@
           "201": {
             "description": "Created",
             "content": {
-              "*/*": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -41,7 +41,7 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "*/*": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -90,36 +90,9 @@
             "description": "Bad Request"
           }
         }
-      },
-      "delete": {
-        "tags": [
-          "controller"
-        ],
-        "operationId": "delete",
-        "parameters": [
-          {
-            "name": "shortCode",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
       }
     },
-    "/stats/{shortCode}": {
+    "/api/stats/{shortCode}": {
       "get": {
         "tags": [
           "controller"
@@ -149,7 +122,7 @@
           "404": {
             "description": "Not Found",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/StatsDto"
                 }
@@ -159,12 +132,41 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/StatsDto"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/{shortCode}": {
+      "delete": {
+        "tags": [
+          "controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "shortCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }

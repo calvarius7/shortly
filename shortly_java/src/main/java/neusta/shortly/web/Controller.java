@@ -61,7 +61,7 @@ public class Controller {
                             schema = @Schema(implementation = StatsDto.class))),
             @ApiResponse(responseCode = "404"),
             @ApiResponse(responseCode = "400")})
-    @GetMapping("/api/stats/{shortCode}")
+    @GetMapping(value = "/api/stats/{shortCode}", produces = "application/json")
     public ResponseEntity<StatsDto> getStats(@PathVariable
                                              @ValidShortCode final String shortCode) {
         final Optional<ShortLink> result = shortLinkService.findById(shortCode);
@@ -76,7 +76,7 @@ public class Controller {
     @ApiResponses({
             @ApiResponse(responseCode = "201"),
             @ApiResponse(responseCode = "400")})
-    @PostMapping("/api/shorten")
+    @PostMapping(value = "/api/shorten", produces = "text/plain")
     @ResponseStatus(HttpStatus.CREATED)
     public String create(@Valid @RequestBody final ShortLinkDto inputDto) {
         return shortLinkService.create(inputDto.url(), inputDto.expiresAt())

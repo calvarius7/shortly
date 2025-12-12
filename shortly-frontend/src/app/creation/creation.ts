@@ -2,7 +2,10 @@ import {Component, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {finalize} from 'rxjs/operators';
-import {ControllerService, ShortLinkDto} from '../core/modules/openapi';
+import type {ShortLinkDto} from '../core/modules/openapi';
+import {ControllerService} from '../core/modules/openapi';
+import {ApiErrorUtil} from '../core/shared/api-error.util';
+
 
 @Component({
   selector: 'app-creation',
@@ -36,7 +39,7 @@ export class Creation {
 
     this.loading.set(true);
 
-    this.controller.create(payload, 'body', false, {httpHeaderAccept: 'text/plain' as any})
+    this.controller.create(payload, 'body', false, {httpHeaderAccept: 'text/plain'})
       .pipe(
         finalize(() => this.loading.set(false))
       )
@@ -45,12 +48,9 @@ export class Creation {
           const origin = (typeof window !== 'undefined' && window.location) ? window.location.origin : '';
           this.result.set({shortenedUrl: `${origin}/${shortCode}`});
         },
-        error: (err) => {
-          const errorObj = typeof err?.error === 'string'
-            ? JSON.parse(err.error)
-            : err?.error;
-
-          this.error.set(errorObj?.detail ?? 'Erstellen fehlgeschlagen.');
+        error: (err: unknown) => {
+          const detail = ApiErrorUtil.getDetailFromHttpError(err, 'Erstellen fehlgeschlagen.');
+          this.error.set(detail);
         }
       });
   }

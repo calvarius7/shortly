@@ -8,7 +8,14 @@ frontend:lint:
     - apk add --no-cache git
     - cd ./shortly-frontend
     - npm ci --no-audit --no-fund
-    - npm i -D eslint@^9 typescript-eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin @angular-eslint/eslint-plugin @angular-eslint/eslint-plugin-template globals || true
+    - npm i -D \
+      eslint@^9 \
+      typescript  typescript-eslint \
+      @typescript-eslint/parser \
+      @typescript-eslint/eslint-plugin \
+      @angular-eslint/eslint-plugin \
+      @angular-eslint/eslint-plugin-template \
+      @angular-eslint/template-parser \ || true
   script:
     - npm run lint
   only:

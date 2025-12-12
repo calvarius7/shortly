@@ -4,16 +4,27 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import angular from '@angular-eslint/eslint-plugin';
 import angularTemplate from '@angular-eslint/eslint-plugin-template';
+import templateParser from '@angular-eslint/template-parser';
+
 
 export default [
   // Ignorierte Pfade
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/*.min.js'],
+    ignores: ['**/dist/**',
+      '**/node_modules/**',
+      '**/*.min.js',
+      '**/src/app/core/modules/openapi/**',
+      '**/*.spec.ts'],
   },
 
   // Basis + TypeScript-empfohlene Regeln (mit Type-Checking)
   // Hinweis: recommendedTypeChecked benötigt ein TS-Projekt (tsconfig.json)
-  ...tseslint.configs.recommendedTypeChecked,
+
+  ...tseslint.configs.recommendedTypeChecked.map((cfg) => ({
+    ...cfg,
+    files: ['**/*.ts'],        // <— Begrenzung auf TS
+    ignores: ['**/*.html'],    // <— Schutz, falls ein Preset doch greift
+  })),
 
   // Angular-spezifische Regeln für .ts (Components, Directives, etc.)
   {
@@ -21,7 +32,10 @@ export default [
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: ['./tsconfig.json'],
+        project: [
+          './tsconfig.json',
+          './tsconfig.app.json'
+        ],
         tsconfigRootDir: import.meta.dirname,
         ecmaVersion: 'latest',
         sourceType: 'module',
@@ -58,6 +72,9 @@ export default [
   // Angular Template-Regeln für externe HTML-Dateien
   {
     files: ['**/*.html'],
+    languageOptions: {
+      parser: templateParser,
+    },
     plugins: {
       '@angular-eslint/template': angularTemplate,
     },
