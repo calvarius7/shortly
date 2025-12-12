@@ -25,7 +25,7 @@ RUN ./mvnw -Pnative native:compile -DskipTests \
     -Dspring-boot.native-image.build-args="-H:+StripDebugInfo"
 
 # Komprimieren mit UPX (gamechanger von ~ 170 auf unter 65 MB)
-RUN upx --best --lzma /app/target/shortly
+RUN upx --best --lzma /app/target/shortly-java
 
 # --- Runtime Stage ---
 # enthält zlib, glibc, libstdc++
@@ -33,7 +33,7 @@ FROM gcr.io/distroless/java-base-debian12:nonroot
 
 WORKDIR /app
 
-COPY --from=builder /app/target/shortly /app/shortly
+COPY --from=builder /app/target/shortly-java /app/shortly
 
 EXPOSE 8080
 
