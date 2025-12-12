@@ -10,6 +10,17 @@ variables:
   ECO_CI_CO2_CALCULATION_METHOD: "location-based"
   ECO_CI_JSON_OUTPUT: "true"
 
+default:
+  tags:
+    - docker
+  interruptible: true
+  cache:
+    - key: "m2_${CI_COMMIT_REF_SLUG}"
+      fallback_keys:
+        - "m2_${CI_DEFAULT_BRANCH}"
+      paths:
+        - .m2/repository
+
 include:
   - local: shortly_java/.gitlab-ci.yml
   - local: shortly-frontend/.gitlab-ci.yml
