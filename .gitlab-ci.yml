@@ -19,18 +19,18 @@ default:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
-        - shortly_java/**/*
+        - shortly-java/**/*
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "push"'
       changes:
-        - shortly_java/**/*
+        - shortly-java/**/*
       when: on_success
 
 .rules:shortly_java_deploy:
   rules:
     - if: '$CI_COMMIT_TAG'
       changes:
-        - shortly_java/**/*
+        - shortly-java/**/*
       when: on_success
 
 .rules:shortly_frontend:
@@ -54,7 +54,7 @@ default:
 
 
 include:
-  - local: shortly_java/.gitlab-ci.yml
+  - local: shortly-java/.gitlab-ci.yml
   - local: shortly-frontend/.gitlab-ci.yml
   - remote: 'https://raw.githubusercontent.com/green-coding-solutions/eco-ci-energy-estimation/main/eco-ci-gitlab.yml'
 
