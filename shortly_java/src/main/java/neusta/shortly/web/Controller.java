@@ -91,6 +91,7 @@ public class Controller {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable
                        @ValidShortCode final String shortCode) {
+        final var i = new StatsDto("ABC123", 1);
         shortLinkService.deleteById(shortCode);
     }
 
