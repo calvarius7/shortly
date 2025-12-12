@@ -42,7 +42,7 @@ java:build:
       - target/classes
   only:
     changes:
-      - shortly_java/**/*
+      - shortly_java/**
 
 # ---------- TEST (parallel) ----------
 
@@ -67,7 +67,7 @@ java:unit-tests:
       - target/shortly
   only:
     changes:
-      - shortly_java/**/*
+      - shortly_java/**
 
 
 java:integration-tests:
@@ -86,8 +86,7 @@ java:integration-tests:
       - target/failsafe-reports/*
   only:
     changes:
-      - shortly_java/**/*
-
+      - shortly_java/**
 
 java:mutation-tests:
   extends: .eco-ci-base
@@ -102,7 +101,7 @@ java:mutation-tests:
       - target/pit-reports/**
   only:
     changes:
-      - shortly_java/**/*
+      - shortly_java/**
 
 # ---------- QUALITY (parallel) ----------
 
@@ -134,7 +133,7 @@ java:quality-pmd:
       - target/site/pmd.html
   only:
     changes:
-      - shortly_java/**/*
+      - shortly_java/**
 
 java:quality-spotbugs:
   extends: .eco-ci-base
@@ -150,7 +149,7 @@ java:quality-spotbugs:
       - target/spotbugsHtml.html
   only:
     changes:
-      - shortly_java/**/*
+      - shortly_java/**
 
 java:quality-dependency-check:
   extends: .eco-ci-base
@@ -167,7 +166,7 @@ java:quality-dependency-check:
       - target/bom.xml
   only:
     changes:
-      - shortly_java/**/*
+      - shortly_java/**
 
 java:quality-trivy:
   stage: quality
@@ -187,7 +186,7 @@ java:quality-trivy:
       - trivy.json
   only:
     changes:
-      - shortly_java/**/*
+      - shortly_java/**
 
 # ---------- DEPLOY ----------
 
@@ -217,8 +216,10 @@ java:deploy-native-image:
   after_script:
     - !reference [ .get_measurement, script ]
     - !reference [ .display_results, script ]
-  only:
-    - tags
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      changes:
+        - shortly_java/**
 
 java:scan-image-remote:
   stage: deploy
@@ -242,5 +243,7 @@ java:scan-image-remote:
     paths:
       - trivy-image.sarif
       - trivy-image.json
-  only:
-    - tags
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      changes:
+        - shortly_java/**

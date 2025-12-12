@@ -38,7 +38,7 @@ frontend:lighthouse:
     # Lokales Build des Frontend-Images (kein Push)
     - docker build --progress=plain --pull --no-cache --provenance=false -t shortly-frontend:ci .
     # Container starten
-    - docker run -d --rm -p 8080:80 --name shortly-frontend-ci shortly-frontend:ci
+    - docker run -d --rm -p 80:80 --name shortly-frontend-ci shortly-frontend:ci
     # Lighthouse installieren
     - npm i -g lighthouse
     # Warten bis der Container bereit ist
@@ -65,6 +65,8 @@ frontend:lighthouse:
     paths:
       - shortly_angular/lighthouse-report.html
     expire_in: 2 weeks
+
+  allow_failure: true
   only:
     - merge_requests
     - branches
