@@ -1,6 +1,6 @@
-HELP.md
+shortly-java/HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
+shortly-java/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 

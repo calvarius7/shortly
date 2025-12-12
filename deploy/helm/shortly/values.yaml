@@ -1,69 +1,170 @@
 nameOverride: ""
 fullnameOverride: ""
 
-image:
-  repository: shortly
-  tag: "latest"
-  pullPolicy: IfNotPresent
-  # imagePullSecrets: [ ] # e.g., [{ name: regcred }]
+# -------------------------------------------------
+# Angular Frontend
+# -------------------------------------------------
+frontend:
+  enabled: true
+  image:
+    # Eigenes Frontend-Image mit Angular-Build und NGINX
+    repository: shortly-frontend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  imagePullSecrets: [ ]
+  replicaCount: 1
 
-imagePullSecrets: [ ]
+  service:
+    type: ClusterIP
+    port: 80
 
-replicaCount: 1
+  # Für Production: Eigenes Docker-Image verwenden (siehe shortly-frontend/Dockerfile)
+  # ConfigMap-basierter Deployment-Ansatz wird NICHT verwendet
+  staticFiles:
+    useConfigMap: false
 
-service:
-  type: ClusterIP
-  port: 8080
+  # Liveness/Readiness Probes
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 80
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
 
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+  podAnnotations: { }
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
+
+# -------------------------------------------------
+# Spring Backend
+# -------------------------------------------------
+backend:
+  enabled: true
+  image:
+    repository: shortly-java
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  imagePullSecrets: [ ]
+  replicaCount: 1
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  # Umgebungsvariablen für Spring Boot
+  env:
+    - name: SERVER_PORT
+      value: "8080"
+    - name: SPRING_DATA_REDIS_HOST
+      value: "shortly-redis"
+    - name: SPRING_DATA_REDIS_PORT
+      value: "6379"
+    - name: SPRING_PROFILES_ACTIVE
+      value: "prod"
+
+  # Liveness/Readiness Probes (Spring Boot Actuator)
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8080
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  podAnnotations: { }
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
+
+# -------------------------------------------------
+# Ingress
+# -------------------------------------------------
 ingress:
-  enabled: false
-  className: ""
-  annotations: { }
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
   hosts:
-    - host: shortly.local
-      paths:
-        - path: /
-          pathType: Prefix
+    - host: ""   # leer für localhost/Minikube; bei echter Domain hier eintragen
   tls: [ ]
+  # Für Production mit TLS:
+  # tls:
+  #   - secretName: shortly-tls
+  #     hosts:
+  #       - shortly.example.com
 
-resources: { }
-#  requests:
-#    cpu: 100m
-#    memory: 128Mi
-#  limits:
-#    cpu: 500m
-#    memory: 512Mi
-
-env:
-  # Additional environment variables for the app
-  # - name: SOME_VAR
-  #   value: some-value
-  [ ]
-
+# -------------------------------------------------
+# Redis
+# -------------------------------------------------
 redis:
   enabled: true
-  image: redis:latest
+  image: "redis:8-alpine"
   port: 6379
-  resources: { }
+
+  # Für Production: Persistence aktivieren
   persistence:
-    enabled: false
+    enabled: false  # Bei echtem Prod-Setup auf true setzen
     size: 1Gi
+    storageClass: ""  # Standard-StorageClass verwenden
 
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# -------------------------------------------------
+# Monitoring
+# -------------------------------------------------
 monitoring:
-  # Add Prometheus annotations to the Service for basic scraping
   annotationsScrape: true
-
   serviceMonitor:
     enabled: true
-    # Namespace where kube-prometheus-stack is installed
     namespace: monitoring
-    # Labels for the ServiceMonitor so kube-prometheus-stack picks it up
     additionalLabels:
       release: kube-prometheus-stack
     interval: 15s
     scrapeTimeout: 10s
-
-podAnnotations: { }
-nodeSelector: { }
-tolerations: [ ]
-affinity: { }

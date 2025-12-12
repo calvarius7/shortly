@@ -1,0 +1,86 @@
+/* Container centers content vertically and horizontally */
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* full viewport height */
+  padding: 0 1rem;
+  box-sizing: border-box;
+  background: #f9f9f9;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+/* Headline */
+.container h1 {
+  margin-bottom: 0.25rem;
+  font-size: 2rem;
+  color: #222;
+}
+
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+/* Input field */
+.container input[type="text"] {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  width: 250px;
+  max-width: 90vw;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.container input[type="text"]:focus {
+  outline: none;
+  border-color: #007BFF;
+}
+
+/* Button */
+.container button {
+  padding: 0.55rem 1.5rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007BFF;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 260px;
+  max-width: 90vw;
+}
+
+#url-copy-button {
+  background-color: darkolivegreen;
+}
+
+#url-copy-button:hover {
+  background-color: #556b5f;
+}
+
+.container button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  .container input[type="text"],
+  .container button {
+    width: 100%;
+  }
+}
+
+/* Error message */
+.error-message {
+  color: crimson;
+}

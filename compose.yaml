@@ -1,14 +1,22 @@
 services:
-  app:
-    build: .
-    ports:
-      - '8080:8080'
-    environment:
-      - SPRING_DATA_REDIS_HOST=redis
-    depends_on:
-      - redis
+  #  app:
+  #    build: shortly_java/.
+  #    ports:
+  #      - '8080:8080'
+  #    environment:
+  #      - SPRING_DATA_REDIS_HOST=redis
+  #    depends_on:
+  #      - redis
+  #    profiles:
+  #      - production
 
   redis:
     image: 'redis:latest'
     ports:
       - '6379'
+
+  frontend:
+    image: shortly-frontend
+    build: shortly-frontend/.
+    ports:
+      - "80:80"
