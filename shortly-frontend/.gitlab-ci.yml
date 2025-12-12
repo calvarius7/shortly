@@ -30,9 +30,9 @@ frontend:lighthouse:
   extends: .rules:shortly_frontend
   stage: test
   # Optional: erst Lint, dann Lighthouse
-  needs: [ "frontend:lint" ]
+  #  needs: [ "frontend:lint" ]
   before_script:
-    - apk add --no-cache nodejs npm chromium nss
+    - apk add --no-cache nodejs npm chromium nss curl
     - cd ./shortly-frontend
     # Lokales Build des Frontend-Images (kein Push)
     - docker build --progress=plain --pull --no-cache --provenance=false -t shortly-frontend:ci .
@@ -63,7 +63,7 @@ frontend:lighthouse:
     when: always
     paths:
       - shortly_angular/lighthouse-report.html
-    expire_in: 2 weeks
+    expire_in: 1 day
   allow_failure: true
 
 # -------------------------
