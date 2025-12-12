@@ -3,8 +3,17 @@ variables:
   MAVEN_REPO_LOCAL: "$CI_PROJECT_DIR/.m2/repository"
   MAVEN_CLI_OPTS: "--no-transfer-progress -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -B -V"
 
+default:
+  cache:
+    - key: "m2_${CI_COMMIT_REF_SLUG}"
+      fallback_keys:
+        - "m2_${CI_DEFAULT_BRANCH}"
+      paths:
+        - .m2/repository
+
 .eco-ci-base:
   image: eclipse-temurin:25-jdk-jammy
+  extends: .rules:shortly_java
   before_script:
     - apt-get update
     - apt-get install -y git jq curl
@@ -29,9 +38,6 @@ java:build:
     paths:
       - target/*.jar
       - target/classes
-  only:
-    changes:
-      - shortly_java/**/*
 
 # ---------- TEST (parallel) ----------
 
@@ -54,10 +60,6 @@ java:unit-tests:
       - target/surefire-reports/*
       - target/*.jar
       - target/shortly
-  only:
-    changes:
-      - shortly_java/**/*
-
 
 java:integration-tests:
   extends: .eco-ci-base
@@ -73,9 +75,6 @@ java:integration-tests:
         - target/failsafe-reports/TEST-*.xml
     paths:
       - target/failsafe-reports/*
-  only:
-    changes:
-      - shortly_java/**/*
 
 java:mutation-tests:
   extends: .eco-ci-base
@@ -88,9 +87,6 @@ java:mutation-tests:
     expire_in: 1 day
     paths:
       - target/pit-reports/**
-  only:
-    changes:
-      - shortly_java/**/*
 
 # ---------- QUALITY (parallel) ----------
 
@@ -120,9 +116,6 @@ java:quality-pmd:
     paths:
       - target/pmd.xml
       - target/site/pmd.html
-  only:
-    changes:
-      - shortly_java/**/*
 
 java:quality-spotbugs:
   extends: .eco-ci-base
@@ -136,9 +129,6 @@ java:quality-spotbugs:
     paths:
       - target/spotbugsXml.xml
       - target/spotbugsHtml.html
-  only:
-    changes:
-      - shortly_java/**/*
 
 java:quality-dependency-check:
   extends: .eco-ci-base
@@ -153,12 +143,10 @@ java:quality-dependency-check:
     paths:
       - target/dependency-check-report.*
       - target/bom.xml
-  only:
-    changes:
-      - shortly_java/**/*
 
 java:quality-trivy:
   stage: quality
+  extends: .rules:shortly_java
   image:
     name: aquasec/trivy:latest
     entrypoint: [ "" ]
@@ -173,14 +161,12 @@ java:quality-trivy:
     paths:
       - trivy.sarif
       - trivy.json
-  only:
-    changes:
-      - shortly_java/**/*
 
 # ---------- DEPLOY ----------
 
 java:deploy-native-image:
   image: docker-repository.intern.neusta.de/tn-docker:latest
+  extends: .rules:shortly_java_deploy
   variables:
     DOCKER_BUILDKIT: 1
   stage: deploy
@@ -205,13 +191,10 @@ java:deploy-native-image:
   after_script:
     - !reference [ .get_measurement, script ]
     - !reference [ .display_results, script ]
-  rules:
-    - if: '$CI_COMMIT_TAG'
-      changes:
-        - shortly_java/**/*
 
 java:scan-image-remote:
   stage: deploy
+  extends: .rules:shortly_java_deploy
   image:
     name: aquasec/trivy:latest
     entrypoint: [ "" ]
@@ -232,7 +215,3 @@ java:scan-image-remote:
     paths:
       - trivy-image.sarif
       - trivy-image.json
-  rules:
-    - if: '$CI_COMMIT_TAG'
-      changes:
-        - shortly_java/**/*

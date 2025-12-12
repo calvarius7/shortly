@@ -3,6 +3,7 @@ variables:
 
 frontend:lint:
   image: node:20-alpine
+  extends: .rules:shortly_frontend
   stage: test
   before_script:
     - apk add --no-cache git
@@ -29,6 +30,7 @@ frontend:lint:
 # ------------------------------------------
 frontend:lighthouse:
   image: docker-repository.intern.neusta.de/tn-docker:latest
+  extends: .rules:shortly_frontend
   stage: test
   # Optional: erst Lint, dann Lighthouse
   needs: [ "frontend:lint" ]
@@ -44,14 +46,14 @@ frontend:lighthouse:
     # Warten bis der Container bereit ist
     - |
       for i in $(seq 1 30); do
-        if curl -sSf http://localhost:8080 >/dev/null 2>&1; then
+        if curl -sSf http://localhost:80 >/dev/null 2>&1; then
           echo "Frontend ist erreichbar."; break;
         fi
         echo "Warte auf Frontend... ($i/30)"; sleep 1;
       done
   script:
     - |
-      lighthouse http://localhost:8080 \
+      lighthouse http://localhost:80 \
         --chrome-path=/usr/bin/chromium-browser \
         --output html \
         --output-path ./lighthouse-report.html \
@@ -65,17 +67,14 @@ frontend:lighthouse:
     paths:
       - shortly_angular/lighthouse-report.html
     expire_in: 2 weeks
-
   allow_failure: true
-  only:
-    - merge_requests
-    - branches
 
 # -------------------------
 # DEPLOY JOB (nur Tags)
 # -------------------------
 frontend:deploy:
   image: docker-repository.intern.neusta.de/tn-docker:latest
+  extends: .rules:shortly_frontend_deploy
   variables:
     DOCKER_BUILDKIT: "1"
   stage: deploy
@@ -100,11 +99,10 @@ frontend:deploy:
   after_script:
     - !reference [ .get_measurement, script ]
     - !reference [ .display_results, script ]
-  only:
-    - tags
 
 frontend:scan-image-remote:
   stage: deploy
+  extends: .rules:shortly_frontend_deploy
   image:
     name: aquasec/trivy:latest
     entrypoint: [ "" ]
@@ -125,5 +123,3 @@ frontend:scan-image-remote:
     paths:
       - trivy-image.sarif
       - trivy-image.json
-  only:
-    - tags
