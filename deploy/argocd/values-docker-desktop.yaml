@@ -11,7 +11,7 @@ frontend:
     tag: latest
     pullPolicy: Always
   imagePullSecrets:
-    - name: gitlab-registry
+    - name: gitlab-registry2
   replicaCount: 1
   service:
     type: ClusterIP
@@ -34,7 +34,7 @@ backend:
     tag: latest
     pullPolicy: Always
   imagePullSecrets:
-    - name: gitlab-registry
+    - name: gitlab-registry2
   replicaCount: 1
   service:
     type: ClusterIP
@@ -69,7 +69,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
   hosts:
     - host: ""  # leer für localhost/Docker Desktop
-  tls: []
+  tls: [ ]
 
 # -------------------------------------------------
 # Redis

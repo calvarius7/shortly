@@ -7,4 +7,4 @@
 #  kubectl patch serviceaccount default -n shortly --patch-file .\deploy\patch-sa.yaml
 imagePullSecrets:
   - name: dockerhub-registry
-  - name: gitlab-registry
+  - name: gitlab-registry2
