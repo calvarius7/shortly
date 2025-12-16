@@ -76,7 +76,7 @@ ingress:
 # -------------------------------------------------
 redis:
   enabled: true
-  image: docker.io/redis:8-alpine
+  image: redis:8-alpine
   port: 6379
   persistence:
     enabled: false  # Für Docker Desktop Development
