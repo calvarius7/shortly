@@ -58,6 +58,12 @@ metadata:
   labels:
     app: {{ include "shortly.name" . }}
     component: backend
+  {{- if .Values.monitoring.annotationsScrape }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "{{ .Values.backend.service.port }}"
+  {{- end }}
 spec:
   type: {{ .Values.backend.service.type }}
   selector:

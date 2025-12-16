@@ -8,7 +8,7 @@ frontend:
   enabled: true
   image:
     # Eigenes Frontend-Image mit Angular-Build und NGINX
-    repository: shortly-frontend
+    repository: projectregistry.neusta.de/limmoor/shortly/frontend
     tag: "latest"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
@@ -26,7 +26,7 @@ frontend:
   # Liveness/Readiness Probes
   livenessProbe:
     httpGet:
-      path: /health
+      path: /
       port: 80
     initialDelaySeconds: 10
     periodSeconds: 30
@@ -35,7 +35,7 @@ frontend:
 
   readinessProbe:
     httpGet:
-      path: /health
+      path: /
       port: 80
     initialDelaySeconds: 5
     periodSeconds: 10
@@ -61,7 +61,7 @@ frontend:
 backend:
   enabled: true
   image:
-    repository: shortly-java
+    repository: projectregistry.neusta.de/limmoor/shortly/java
     tag: "latest"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
@@ -118,7 +118,7 @@ backend:
 # Ingress
 # -------------------------------------------------
 ingress:
-  enabled: true
+  enabled: false
   className: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
@@ -139,7 +139,7 @@ ingress:
 # -------------------------------------------------
 redis:
   enabled: true
-  image: "redis:8-alpine"
+  image: "docker.io/redis:8-alpine"
   port: 6379
 
   # Für Production: Persistence aktivieren

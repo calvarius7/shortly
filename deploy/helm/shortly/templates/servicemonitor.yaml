@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "shortly.fullname" . }}
+  name: {{ include "shortly.fullname" . }}-backend
   labels:
     {{- include "shortly.labels" . | nindent 4 }}
     {{- with .Values.monitoring.serviceMonitor.additionalLabels }}
@@ -12,8 +12,8 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "shortly.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      app: {{ include "shortly.name" . }}
+      component: backend
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
