@@ -19,11 +19,12 @@ spec:
     spec:
       containers:
         - name: redis
-          image: {{ .Values.redis.image }}
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.redis.port }}
               name: redis
-          args: ["--save", "", "--appendonly", "no"]
+          args: [ "--save", "", "--appendonly", "no" ]
           resources:
             {{- toYaml .Values.redis.resources | nindent 12 }}
           volumeMounts:
@@ -35,7 +36,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "shortly.fullname" . }}-redis
           {{- else }}
-          emptyDir: {}
+          emptyDir: { }
           {{- end }}
 ---
 apiVersion: v1

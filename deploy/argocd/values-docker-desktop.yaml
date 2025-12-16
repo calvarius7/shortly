@@ -76,8 +76,10 @@ ingress:
 # -------------------------------------------------
 redis:
   enabled: true
-  image: redis:8-alpine
-  pullPolicy: IfNotPresent
+  image:
+    repository: redis
+    tag: 8-alpine
+    pullPolicy: IfNotPresent
   port: 6379
   persistence:
     enabled: false  # Für Docker Desktop Development
