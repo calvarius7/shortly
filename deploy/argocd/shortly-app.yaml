@@ -20,7 +20,7 @@ spec:
     helm:
       valueFiles:
         - values.yaml
-        - ../argocd/values-docker-desktop.yaml
+        - ../../argocd/values-docker-desktop.yaml
 
   destination:
     # Docker Desktop K8s Cluster
