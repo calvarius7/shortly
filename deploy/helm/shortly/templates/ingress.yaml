@@ -36,18 +36,17 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-          # Shortcode-Pattern: Exakt 6 alphanumerische Zeichen → Backend
-          # WICHTIG: Muss VOR dem Prefix-Path stehen!
-          - path: /([A-Za-z0-9]{6})$
-            pathType: ImplementationSpecific
+          # API-Endpoints -> Backend (Zuerst prüfen!)
+          - path: /api
+            pathType: Prefix
             backend:
               service:
                 name: {{ include "shortly.fullname" $ }}-backend
                 port:
                   number: {{ $.Values.backend.service.port }}
-          # API-Endpoints → Backend
-          - path: /api
-            pathType: Prefix
+          # Shortcode-Pattern: Exakt 6 alphanumerische Zeichen
+          - path: /([A-Za-z0-9]{6})$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ include "shortly.fullname" $ }}-backend
