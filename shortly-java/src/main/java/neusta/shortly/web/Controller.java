@@ -23,7 +23,6 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@CrossOrigin(allowedHeaders = "*", origins = "*")
 @RequestMapping("")
 public class Controller {
 
