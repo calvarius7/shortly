@@ -4,7 +4,8 @@
 #  --docker-username=DEIN_DOCKERHUB_USERNAME \
 #  --docker-password=DEIN_ACCESS_TOKEN \
 #  --docker-email=deine@email.de
-#  kubectl patch serviceaccount default -n shortly --patch-file .\deploy\patch-sa.yaml
+#  kubectl patch serviceaccount default -n shortly --patch-file .\patch-sa.yaml
 imagePullSecrets:
   - name: dockerhub-registry
   - name: gitlab-registry2
+  - name: neusta-registry

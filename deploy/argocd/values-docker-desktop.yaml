@@ -80,6 +80,8 @@ redis:
     repository: docker-repository.intern.neusta.de/redis
     tag: 8-alpine
     pullPolicy: IfNotPresent
+  imagePullSecrets:
+    - name: neusta-registry
   port: 6379
   persistence:
     enabled: false  # Für Docker Desktop Development
