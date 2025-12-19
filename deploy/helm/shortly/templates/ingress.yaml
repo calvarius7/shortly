@@ -10,10 +10,8 @@ metadata:
     {{- if .Values.ingress.className }}
     kubernetes.io/ingress.class: {{ .Values.ingress.className | quote }}
     {{- end }}
-    # Regex-Matching für Shortcodes aktivieren
     nginx.ingress.kubernetes.io/use-regex: "true"
-    # Höhere Priority für Shortcode-Pattern
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    # ENTFERNT: rewrite-target hier - macht Probleme für /api und /
     {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -36,15 +34,15 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-          # API-Endpoints -> Backend (Zuerst prüfen!)
-          - path: /api
-            pathType: Prefix
+          # API-Endpoints -> Backend
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ include "shortly.fullname" $ }}-backend
                 port:
                   number: {{ $.Values.backend.service.port }}
-          # Shortcode-Pattern: Exakt 6 alphanumerische Zeichen
+          # Shortcode-Pattern: Exakt 6 alphanumerische Zeichen -> Backend
           - path: /([A-Za-z0-9]{6})$
             pathType: ImplementationSpecific
             backend:
@@ -52,7 +50,7 @@ spec:
                 name: {{ include "shortly.fullname" $ }}-backend
                 port:
                   number: {{ $.Values.backend.service.port }}
-          # Alles andere → Frontend (Angular SPA)
+          # Alles andere -> Frontend
           - path: /
             pathType: Prefix
             backend:
