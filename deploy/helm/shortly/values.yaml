@@ -9,7 +9,7 @@ frontend:
   image:
     # Eigenes Frontend-Image mit Angular-Build und NGINX
     repository: projectregistry.neusta.de/limmoor/shortly/frontend
-    tag: "latest"
+    tag: "0.0.4"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
   replicaCount: 1
@@ -18,8 +18,6 @@ frontend:
     type: ClusterIP
     port: 80
 
-  # Für Production: Eigenes Docker-Image verwenden (siehe shortly-frontend/Dockerfile)
-  # ConfigMap-basierter Deployment-Ansatz wird NICHT verwendet
   staticFiles:
     useConfigMap: false
 
@@ -62,7 +60,7 @@ backend:
   enabled: true
   image:
     repository: projectregistry.neusta.de/limmoor/shortly/java
-    tag: "latest"
+    tag: "0.0.4"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
   replicaCount: 1

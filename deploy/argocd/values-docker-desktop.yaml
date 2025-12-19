@@ -1,107 +1,32 @@
 # deploy/argocd/values-docker-desktop.yaml
-# Überschreibt values.yaml für Docker Desktop mit GitLab Registry
+# Überschreibt NUR die Unterschiede zu values.yaml für Docker Desktop
 
-# -------------------------------------------------
-# Frontend (Angular + NGINX)
-# -------------------------------------------------
 frontend:
-  enabled: true
   image:
-    repository: projectregistry.neusta.de/limmoor/shortly/frontend
-    tag: latest
     pullPolicy: Always
   imagePullSecrets:
     - name: gitlab-registry2
-  replicaCount: 1
-  service:
-    type: ClusterIP
-    port: 80
-  resources:
-    requests:
-      memory: "64Mi"
-      cpu: "50m"
-    limits:
-      memory: "128Mi"
-      cpu: "200m"
 
-# -------------------------------------------------
-# Backend (Spring Boot)
-# -------------------------------------------------
 backend:
-  enabled: true
   image:
-    repository: projectregistry.neusta.de/limmoor/shortly/java
-    tag: latest
     pullPolicy: Always
   imagePullSecrets:
     - name: gitlab-registry2
-  replicaCount: 1
-  service:
-    type: ClusterIP
-    port: 8080
   env:
     - name: SERVER_PORT
       value: "8080"
     - name: SPRING_DATA_REDIS_HOST
-      value: "shortly-shortly-redis"
+      value: "shortly-shortly-redis"  # Angepasster Service-Name für Docker Desktop
     - name: SPRING_DATA_REDIS_PORT
       value: "6379"
     - name: SPRING_PROFILES_ACTIVE
       value: "prod"
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "100m"
-    limits:
-      memory: "512Mi"
-      cpu: "500m"
 
-# -------------------------------------------------
-# Ingress (NGINX Ingress Controller)
-# -------------------------------------------------
 ingress:
   enabled: true
-  className: "nginx"
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
-  hosts:
-    - host: ""  # leer für localhost/Docker Desktop
-  tls: [ ]
 
-# -------------------------------------------------
-# Redis
-# -------------------------------------------------
 redis:
-  enabled: true
-  image:
-    repository: docker-repository.intern.neusta.de/redis
-    tag: 8-alpine
-    pullPolicy: Never #workaround because i cant pull anywhere
   imagePullSecrets:
     - name: neusta-registry
-  port: 6379
   persistence:
-    enabled: false  # Für Docker Desktop Development
-  resources:
-    requests:
-      memory: "64Mi"
-      cpu: "50m"
-    limits:
-      memory: "256Mi"
-      cpu: "200m"
-
-# -------------------------------------------------
-# Monitoring (Prometheus + Grafana)
-# -------------------------------------------------
-monitoring:
-  annotationsScrape: true
-  serviceMonitor:
-    enabled: true
-    namespace: monitoring
-    additionalLabels:
-      release: kube-prometheus-stack
-    interval: 15s
-    scrapeTimeout: 10s
+    enabled: false
