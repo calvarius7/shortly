@@ -79,7 +79,7 @@ redis:
   image:
     repository: docker-repository.intern.neusta.de/redis
     tag: 8-alpine
-    pullPolicy: IfNotPresent
+    pullPolicy: never #workaround because i cant pull anywhere
   imagePullSecrets:
     - name: neusta-registry
   port: 6379

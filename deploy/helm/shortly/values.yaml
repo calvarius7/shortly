@@ -139,7 +139,10 @@ ingress:
 # -------------------------------------------------
 redis:
   enabled: true
-  image: "docker-repository.intern.neusta.de/redis:8-alpine"
+  image:
+    repository: docker-repository.intern.neusta.de/redis
+    tag: 8-alpine
+    pullPolicy: never #workaround because i cant pull anywhere
   port: 6379
 
   # Für Production: Persistence aktivieren

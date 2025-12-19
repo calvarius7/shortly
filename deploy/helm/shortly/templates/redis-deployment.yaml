@@ -20,7 +20,7 @@ spec:
       containers:
         - name: redis
           image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
-          imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy | default "never" }}
           ports:
             - containerPort: {{ .Values.redis.port }}
               name: redis

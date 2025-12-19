@@ -1,6 +1,7 @@
 # ArgoCD Deployment für Shortly
 
-Diese Anleitung beschreibt, wie du die Shortly-Anwendung mit ArgoCD auf einem Kubernetes-Cluster (z.B. Docker Desktop) deployst.
+Diese Anleitung beschreibt, wie du die Shortly-Anwendung mit ArgoCD auf einem Kubernetes-Cluster (z.B. Docker Desktop)
+deployst.
 
 ## Voraussetzungen
 
@@ -81,6 +82,22 @@ helm repo update
 
 # kube-prometheus-stack installieren
 helm upgrade --install kube-prometheus-stack   prometheus-community/kube-prometheus-stack   --namespace monitoring   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+
+#Check its status by running:
+kubectl --namespace monitoring get pods -l "release=kube-prometheus-stack"
+
+#Get Grafana 'admin' user password by running:
+
+kubectl --namespace monitoring get secrets kube-prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 -d ; echo
+
+#Access Grafana local instance:
+
+export POD_NAME=$(kubectl --namespace monitoring get pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=kube-prometheus-stack" -oname)
+kubectl --namespace monitoring port-forward $POD_NAME 3000
+
+# Get your grafana admin user password by running:
+
+kubectl get secret --namespace monitoring -l app.kubernetes.io/component=admin-secret -o jsonpath="{.items[0].data.admin-password}" | base64 --decode ; echo
 ```
 
 ## 5. Shortly Application über ArgoCD deployen
@@ -125,6 +142,7 @@ kubectl port-forward -n shortly svc/shortly-backend 8080:8080
 ```
 
 Zugriff:
+
 - Frontend: http://localhost:4200
 - Backend API: http://localhost:8080/api
 - Backend Health: http://localhost:8080/actuator/health
@@ -135,6 +153,7 @@ Zugriff:
 ArgoCD synchronisiert automatisch bei Änderungen im Git-Repository.
 
 Manuell synchronisieren:
+
 ```bash
 argocd app sync shortly
 ```
