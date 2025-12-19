@@ -77,7 +77,7 @@ ingress:
 redis:
   enabled: true
   image:
-    repository: redis
+    repository: docker-repository.intern.neusta.de/redis
     tag: 8-alpine
     pullPolicy: IfNotPresent
   port: 6379

@@ -139,7 +139,7 @@ ingress:
 # -------------------------------------------------
 redis:
   enabled: true
-  image: "redis:8-alpine"
+  image: "docker-repository.intern.neusta.de/redis:8-alpine"
   port: 6379
 
   # Für Production: Persistence aktivieren
