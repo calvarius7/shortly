@@ -13,6 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(),
     // Point the OpenAPI client to the backend including the /api base path
+    //todo fix pathing
     provideApi('/')
   ]
 };

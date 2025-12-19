@@ -33,6 +33,7 @@ spec:
     {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
+        # TODO fix backend reachable
         paths:
           # API-Endpoints -> Backend
           - path: /api(/|$)(.*)

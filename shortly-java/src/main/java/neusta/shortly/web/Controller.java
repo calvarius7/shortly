@@ -23,6 +23,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Validated
+//TODO fix pathing
 @RequestMapping("")
 public class Controller {
 

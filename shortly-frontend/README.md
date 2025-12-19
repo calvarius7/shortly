@@ -63,3 +63,8 @@ For more information on using the Angular CLI, including detailed command refere
 ```bash
 npx openapi-generator-cli generate -i ../shortly_api.yaml -g typescript-angular -o src/app/core/modules/openapi --additional-properties fileNaming=kebab-case,withInterfaces=true --generate-alias-as-model      
 ```
+
+## TODO
+
+- add stats view
+- add tests
