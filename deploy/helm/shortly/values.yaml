@@ -142,7 +142,7 @@ redis:
   image:
     repository: docker-repository.intern.neusta.de/redis
     tag: 8-alpine
-    pullPolicy: never #workaround because i cant pull anywhere
+    pullPolicy: Never #workaround because i cant pull anywhere
   port: 6379
 
   # Für Production: Persistence aktivieren
