@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -26,6 +27,9 @@ class ShortLinkServiceTest {
 
     @Mock
     ShortCodeGenerator generator;
+
+    @Mock
+    RedisTemplate<String, Object> redisTemplate;
 
     @InjectMocks
     ShortLinkService service;
@@ -87,16 +91,18 @@ class ShortLinkServiceTest {
         @Test
         @DisplayName("erhöht Klickzähler und speichert bei Treffer")
         void incrementsClicksOnHit() {
+            final var key = "ABC123";
             final ShortLink entity = ShortLink.of()
-                    .shortCode("ABC123")
+                    .shortCode(key)
                     .originalUrl("https://e.org")
                     .clicks(2)
                     .ttl(null)
                     .build();
-            when(repository.findById("ABC123")).thenReturn(Optional.of(entity));
+            when(repository.findById(key)).thenReturn(Optional.of(entity));
+            when(redisTemplate.opsForHash().increment(ShortLink.getRedisKey(key), "clicks", 1)).thenReturn(3L);
             when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-            final Optional<ShortLink> result = service.findById("ABC123");
+            final Optional<ShortLink> result = service.findById(key);
             assertThat(result).isPresent();
 
             final ArgumentCaptor<ShortLink> captor = ArgumentCaptor.forClass(ShortLink.class);

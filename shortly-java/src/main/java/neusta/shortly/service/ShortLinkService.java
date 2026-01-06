@@ -4,12 +4,12 @@ import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import neusta.shortly.model.ShortLink;
 import neusta.shortly.persistence.ShortLinkRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -17,25 +17,32 @@ public class ShortLinkService {
 
     private final ShortLinkRepository repository;
     private final ShortCodeGenerator shortCodeGenerator;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     public ShortLink create(final String originalUrl, @Nullable final Instant expiresAt) {
-        final var id = Stream.generate(shortCodeGenerator::generate)
-                .filter(generated -> !repository.existsById(generated))
-                .findFirst()
-                .orElseThrow();
-
         return repository.save(ShortLink.of()
-                .shortCode(id)
+                .shortCode(generateUniqueShortCode())
                 .originalUrl(originalUrl)
                 .ttl(calculateTtl(expiresAt))
                 .build());
     }
 
+    private String generateUniqueShortCode() {
+        String candidate;
+        do {
+            candidate = shortCodeGenerator.generate();
+        } while (repository.existsById(candidate));
+        return candidate;
+    }
+
     public Optional<ShortLink> findById(final String id) {
         return repository.findById(id)
                 .map(shortLink -> {
-                    shortLink.setClicks(shortLink.getClicks() + 1);
-                    return repository.save(shortLink);
+                    // Atomic increment using Redis HINCRBY
+                    final Long clicks = redisTemplate.opsForHash()
+                            .increment(ShortLink.getRedisKey(id), "clicks", 1);
+                    shortLink.setClicks(clicks.intValue());
+                    return shortLink;
                 });
     }
 
