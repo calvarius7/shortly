@@ -4,7 +4,7 @@ import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import neusta.shortly.model.ShortLink;
 import neusta.shortly.persistence.ShortLinkRepository;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -17,7 +17,7 @@ public class ShortLinkService {
 
     private final ShortLinkRepository repository;
     private final ShortCodeGenerator shortCodeGenerator;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
     public ShortLink create(final String originalUrl, @Nullable final Instant expiresAt) {
         return repository.save(ShortLink.of()

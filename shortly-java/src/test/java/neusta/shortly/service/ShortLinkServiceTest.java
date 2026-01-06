@@ -6,11 +6,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -28,8 +28,8 @@ class ShortLinkServiceTest {
     @Mock
     ShortCodeGenerator generator;
 
-    @Mock
-    RedisTemplate<String, Object> redisTemplate;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    StringRedisTemplate redisTemplate;
 
     @InjectMocks
     ShortLinkService service;
@@ -100,14 +100,11 @@ class ShortLinkServiceTest {
                     .build();
             when(repository.findById(key)).thenReturn(Optional.of(entity));
             when(redisTemplate.opsForHash().increment(ShortLink.getRedisKey(key), "clicks", 1)).thenReturn(3L);
-            when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             final Optional<ShortLink> result = service.findById(key);
             assertThat(result).isPresent();
 
-            final ArgumentCaptor<ShortLink> captor = ArgumentCaptor.forClass(ShortLink.class);
-            verify(repository).save(captor.capture());
-            assertThat(captor.getValue().getClicks()).isEqualTo(3);
+            assertThat(result.get().getClicks()).isEqualTo(3);
         }
 
         @Test
