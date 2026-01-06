@@ -9,7 +9,7 @@ frontend:
   image:
     # Eigenes Frontend-Image mit Angular-Build und NGINX
     repository: projectregistry.neusta.de/limmoor/shortly/frontend
-    tag: "0.0.5"
+    tag: "0.0.6"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
   replicaCount: 1
@@ -60,7 +60,7 @@ backend:
   enabled: true
   image:
     repository: projectregistry.neusta.de/limmoor/shortly/java
-    tag: "0.0.4"
+    tag: "0.0.6"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
   replicaCount: 1
