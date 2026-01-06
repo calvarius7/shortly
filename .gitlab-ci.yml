@@ -51,8 +51,6 @@ default:
         - shortly-frontend/**/*
       when: on_success
 
-
-
 include:
   - local: shortly-java/.gitlab-ci.yml
   - local: shortly-frontend/.gitlab-ci.yml

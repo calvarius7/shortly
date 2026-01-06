@@ -33,18 +33,17 @@ spec:
     {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
-        # TODO fix backend reachable
         paths:
           # API-Endpoints -> Backend
-          - path: /api(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /api
+            pathType: Prefix
             backend:
               service:
                 name: {{ include "shortly.fullname" $ }}-backend
                 port:
                   number: {{ $.Values.backend.service.port }}
           # Shortcode-Pattern: Exakt 6 alphanumerische Zeichen -> Backend
-          - path: /([A-Za-z0-9]{6})$
+          - path: /[A-Za-z0-9]{6}
             pathType: ImplementationSpecific
             backend:
               service:
