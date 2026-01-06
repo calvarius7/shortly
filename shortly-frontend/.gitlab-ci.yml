@@ -57,11 +57,11 @@ frontend:scan-image-remote:
   needs: [ "frontend:deploy" ]
   variables:
     IMAGE_REF: "$FRONTEND_IMAGE_NAME:$CI_COMMIT_TAG"
-  script:
-    # FIXME this jobs starts to fast
+  before_script:
     - export TRIVY_USERNAME="$CI_REGISTRY_USER"
     - export TRIVY_PASSWORD="$CI_REGISTRY_PASSWORD"
-
+    - timeout 300 sh -c 'until trivy image --download-only $IMAGE_REF 2>/dev/null; do echo "Waiting..."; sleep 5; done'
+  script:
     # fail fast on critical vulnerabilities but ignore will_not_fix vulnerabilities e.g. CVE-2023-45853
     - trivy image --image-src docker --no-progress --ignore-unfixed --exit-code 1 --severity CRITICAL $IMAGE_REF
     - trivy image --image-src docker --no-progress --exit-code 0 --severity HIGH,CRITICAL --format sarif -o trivy-image.sarif $IMAGE_REF
