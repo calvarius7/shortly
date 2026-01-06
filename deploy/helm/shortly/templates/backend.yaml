@@ -34,10 +34,20 @@ spec:
             - name: http
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
-          {{- with .Values.backend.env }}
           env:
+            - name: SERVER_PORT
+              value: "{{ .Values.backend.service.port }}"
+            {{- if .Values.redis.enabled }}
+            - name: SPRING_DATA_REDIS_HOST
+              value: "{{ include "shortly.fullname" . }}-redis"
+            - name: SPRING_DATA_REDIS_PORT
+              value: "{{ .Values.redis.port }}"
+            {{- end }}
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            {{- with .Values.backend.env }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- end }}
           {{- if .Values.backend.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.backend.livenessProbe | nindent 12 }}

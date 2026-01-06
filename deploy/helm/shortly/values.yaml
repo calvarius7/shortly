@@ -70,15 +70,8 @@ backend:
     port: 8080
 
   # Umgebungsvariablen für Spring Boot
-  env:
-    - name: SERVER_PORT
-      value: "8080"
-    - name: SPRING_DATA_REDIS_HOST
-      value: "shortly-redis"
-    - name: SPRING_DATA_REDIS_PORT
-      value: "6379"
-    - name: SPRING_PROFILES_ACTIVE
-      value: "prod"
+  env: []
+  # Redis host/port werden jetzt dynamisch in backend.yaml gesetzt
 
   # Liveness/Readiness Probes (Spring Boot Actuator)
   livenessProbe:
