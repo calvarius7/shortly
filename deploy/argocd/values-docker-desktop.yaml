@@ -12,15 +12,6 @@ backend:
     pullPolicy: Always
   imagePullSecrets:
     - name: gitlab-registry2
-  env:
-    - name: SERVER_PORT
-      value: "8080"
-    - name: SPRING_DATA_REDIS_HOST
-      value: "shortly-redis"
-    - name: SPRING_DATA_REDIS_PORT
-      value: "6379"
-    - name: SPRING_PROFILES_ACTIVE
-      value: "prod"
 
 ingress:
   enabled: true
