@@ -26,6 +26,8 @@ ingress:
   enabled: true
 
 redis:
+  image:
+    pullPolicy: IfNotPresent
   imagePullSecrets:
     - name: neusta-registry
   persistence:
