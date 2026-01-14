@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### tofu ###
+
+deploy/tofu/.terraform/
