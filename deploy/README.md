@@ -1,25 +1,17 @@
-### Was wurde umgesetzt
+### Automatisches Setup (Empfohlen)
 
-- Kubernetes-IaC hinzugefügt: Eigenes Helm-Chart für die App und einen separaten Redis-Pod.
-- Prometheus-Integration: Service-Annotations und optionaler `ServiceMonitor` (für Prometheus
-  Operator/kube-prometheus-stack).
-- Grafana/Loki: Schritt-für-Schritt Installationsanleitung für Monitoring-Stack (Prometheus+Grafana) und Logging (
-  Loki+Promtail).
-- App konfiguriert für K8s-Probes und Metriken (Actuator): `application.properties` erweitert.
+Für ein professionelles Management des Clusters mit State-Verwaltung und Idempotenz:
 
-### Relevante Dateien/Ordner
+```bash
+cd deploy/tofu
+# terraform.tfvars ausfüllen (siehe terraform.tfvars.example)
+tofu init
+tofu apply
+```
 
-- Neu: `deploy/helm/shortly/Chart.yaml`
-- Neu: `deploy/helm/shortly/values.yaml`
-- Neu: `deploy/helm/shortly/templates/_helpers.tpl`
-- Neu: `deploy/helm/shortly/templates/deployment.yaml`
-- Neu: `deploy/helm/shortly/templates/service.yaml`
-- Neu: `deploy/helm/shortly/templates/ingress.yaml`
-- Neu: `deploy/helm/shortly/templates/redis-deployment.yaml`
-- Neu: `deploy/helm/shortly/templates/servicemonitor.yaml`
-- Geändert: `src/main/resources/application.properties` (Actuator-Endpoints für Health/Prometheus freigeschaltet)
+Details findest du in der [README-TOFU.md](./tofu/README-TOFU.md).
 
-### Wie deployen
+### Wie deployen (Manuell)
 
 1) Image bauen und pushen
 

@@ -1,0 +1,11 @@
+resource "kubectl_manifest" "shortly_project" {
+  yaml_body = file("${path.module}/../argocd/shortly-project.yaml")
+  
+  depends_on = [helm_release.argocd]
+}
+
+resource "kubectl_manifest" "shortly_app" {
+  yaml_body = file("${path.module}/../argocd/shortly-app.yaml")
+  
+  depends_on = [helm_release.argocd, kubectl_manifest.shortly_project]
+}

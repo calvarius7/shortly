@@ -1,0 +1,12 @@
+# GitLab Zugangsdaten
+gitlab_user  = "dein.username"
+gitlab_token = "dein_personal_access_token"
+gitlab_email = "deine.email@neusta.de"
+
+# Kubernetes Konfiguration (optional, Standardwerte für Docker Desktop)
+# kube_config_context = "docker-desktop"
+# kube_config_path    = "~/.kube/config"
+
+# Optionale Komponenten
+# install_monitoring = true
+# install_ingress    = true
