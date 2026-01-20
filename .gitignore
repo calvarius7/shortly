@@ -33,6 +33,5 @@ build/
 .vscode/
 
 ### tofu ###
-
-deploy/tofu/.terraform/
 deploy/tofu/terraform.tfvars
+deploy/tofu/.terraform/
