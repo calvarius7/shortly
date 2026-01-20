@@ -35,3 +35,9 @@ variable "install_ingress" {
   type    = bool
   default = true
 }
+
+variable "install_loki" {
+  type        = bool
+  default     = true
+  description = "Install Loki for log aggregation"
+}

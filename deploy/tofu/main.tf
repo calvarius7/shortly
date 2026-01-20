@@ -102,3 +102,25 @@ resource "helm_release" "monitoring" {
     value = "false"
   }
 }
+
+# Helm Release: Loki Stack (Logs)
+resource "helm_release" "loki" {
+  depends_on = [null_resource.helm_repo_init]
+  count      = var.install_loki ? 1 : 0
+  name       = "loki"
+  repository = "https://grafana.github.io/helm-charts"
+  chart      = "loki-stack"
+  namespace  = kubernetes_namespace.monitoring[0].metadata[0].name
+  version    = "2.10.2"
+
+  # Promtail sammelt Logs von allen Pods
+  set {
+    name  = "promtail.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "loki.persistence.enabled"
+    value = "false"
+  }
+}
