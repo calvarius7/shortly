@@ -86,7 +86,7 @@ class ShortLinkServiceTest {
     }
 
     @Nested
-    @DisplayName("findById()")
+    @DisplayName("resolveAndTrack()")
     class FindById {
         @Test
         @DisplayName("erhöht Klickzähler und speichert bei Treffer")
@@ -101,7 +101,7 @@ class ShortLinkServiceTest {
             when(repository.findById(key)).thenReturn(Optional.of(entity));
             when(redisTemplate.opsForHash().increment(ShortLink.getRedisKey(key), "clicks", 1)).thenReturn(3L);
 
-            final Optional<ShortLink> result = service.findById(key);
+            final Optional<ShortLink> result = service.resolveAndTrack(key);
             assertThat(result).isPresent();
 
             assertThat(result.get().getClicks()).isEqualTo(3);
@@ -112,7 +112,7 @@ class ShortLinkServiceTest {
         void emptyWhenNotFound() {
             when(repository.findById("ZZZZZZ")).thenReturn(Optional.empty());
 
-            final Optional<ShortLink> result = service.findById("ZZZZZZ");
+            final Optional<ShortLink> result = service.resolveAndTrack("ZZZZZZ");
             assertThat(result).isEmpty();
             verify(repository, never()).save(any());
         }

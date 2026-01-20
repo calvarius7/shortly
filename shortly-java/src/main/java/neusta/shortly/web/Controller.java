@@ -41,7 +41,7 @@ public class Controller {
     @GetMapping("/{shortCode}")
     public ResponseEntity<Void> resolveShortCode(@PathVariable
                                                  @ValidShortCode final String shortCode) {
-        final Optional<ShortLink> result = shortLinkService.findById(shortCode);
+        final Optional<ShortLink> result = shortLinkService.resolveAndTrack(shortCode);
         return result
                 .map(ShortLink::getOriginalUrl)
                 .map(url -> ResponseEntity.status(HttpStatus.FOUND)

@@ -39,7 +39,7 @@ class ControllerWebMvcTest {
         @DisplayName("liefert 302 mit Location, wenn gefunden")
         void found() {
             final ShortLink entity = ShortLink.of().shortCode("ABC123").originalUrl("https://example.org").clicks(0).ttl(null).build();
-            when(shortLinkService.findById("ABC123")).thenReturn(Optional.of(entity));
+            when(shortLinkService.resolveAndTrack("ABC123")).thenReturn(Optional.of(entity));
 
             final ResponseEntity<Void> response = controller.resolveShortCode("ABC123");
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FOUND);
@@ -49,7 +49,7 @@ class ControllerWebMvcTest {
         @Test
         @DisplayName("liefert 404, wenn nicht gefunden")
         void notFound() {
-            when(shortLinkService.findById("ZZZZZZ")).thenReturn(Optional.empty());
+            when(shortLinkService.resolveAndTrack("ZZZZZZ")).thenReturn(Optional.empty());
             final ResponseEntity<Void> response = controller.resolveShortCode("ZZZZZZ");
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }

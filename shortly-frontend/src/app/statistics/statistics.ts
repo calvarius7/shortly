@@ -25,7 +25,8 @@ export class Statistics {
     this.error.set('');
     this.stats.set(null);
 
-    const code = this.shortCode();
+    const code = this.extractShortCode(this.shortCode());
+
     if (!code) {
       this.error.set('Bitte einen gültigen Shortcode eingeben.');
       return;
@@ -46,5 +47,13 @@ export class Statistics {
           this.error.set(detail);
         }
       });
+  }
+
+  private extractShortCode(input: string): string {
+    const origin = window.location.origin;
+    if (input.startsWith(origin)) {
+      return input.slice(origin.length).replace(/^\//, ''); // entfernt auch führenden Slash
+    }
+    return input.trim();
   }
 }

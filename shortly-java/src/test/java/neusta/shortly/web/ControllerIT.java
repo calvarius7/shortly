@@ -61,7 +61,7 @@ class ControllerIT {
         final String originalUrl = "https://example.org/stats";
         final String shortCode = createShortLink(originalUrl);
 
-        // act + assert: stats endpoint returns clicks, note: service increments on read
+        // act + assert: stats endpoint returns clicks
         webTestClient.get()
                 .uri("/api/stats/{shortCode}", shortCode)
                 .exchange()
@@ -70,12 +70,12 @@ class ControllerIT {
                 .value(dto -> {
                     assertThat(dto).isNotNull();
                     assertThat(dto.shortCode()).isEqualTo(shortCode);
-                    assertThat(dto.clicks()).isEqualTo(1); // first read increments to 1
+                    assertThat(dto.clicks()).isEqualTo(0); // stats doesn't increment
                 });
 
         // verify Redis state matches
         final var saved = repository.findById(shortCode).orElseThrow();
-        assertThat(saved.getClicks()).isEqualTo(1);
+        assertThat(saved.getClicks()).isEqualTo(0);
     }
 
     @Test

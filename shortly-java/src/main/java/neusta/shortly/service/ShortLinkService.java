@@ -36,6 +36,10 @@ public class ShortLinkService {
     }
 
     public Optional<ShortLink> findById(final String id) {
+        return repository.findById(id);
+    }
+
+    public Optional<ShortLink> resolveAndTrack(final String id) {
         return repository.findById(id)
                 .map(shortLink -> {
                     // Atomic increment using Redis HINCRBY
