@@ -9,7 +9,7 @@ frontend:
   image:
     # Eigenes Frontend-Image mit Angular-Build und NGINX
     repository: projectregistry.neusta.de/limmoor/shortly/frontend
-    tag: "0.0.7"
+    tag: "0.0.8"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
   replicaCount: 1
@@ -60,7 +60,7 @@ backend:
   enabled: true
   image:
     repository: projectregistry.neusta.de/limmoor/shortly/java
-    tag: "0.0.7"
+    tag: "0.0.8"
     pullPolicy: IfNotPresent
   imagePullSecrets: [ ]
   replicaCount: 1
@@ -70,7 +70,7 @@ backend:
     port: 8080
 
   # Umgebungsvariablen für Spring Boot
-  env: []
+  env: [ ]
   # Redis host/port werden jetzt dynamisch in backend.yaml gesetzt
 
   # Liveness/Readiness Probes (Spring Boot Actuator)
