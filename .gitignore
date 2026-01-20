@@ -35,3 +35,4 @@ build/
 ### tofu ###
 
 deploy/tofu/.terraform/
+#deploy/tofu/terraform.tfvars
