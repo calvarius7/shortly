@@ -14,7 +14,7 @@
 
 /* Headline */
 .container h1 {
-  margin-bottom: 0.25rem;
+  margin-bottom: 2rem;
   font-size: 2rem;
   color: #222;
 }
@@ -60,16 +60,72 @@
   max-width: 90vw;
 }
 
-#url-copy-button {
-  background-color: darkolivegreen;
-}
-
-#url-copy-button:hover {
-  background-color: #556b5f;
-}
-
 .container button:hover {
   background-color: #0056b3;
+}
+
+.container button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Error message */
+.error-message {
+  color: crimson;
+  margin-top: 1rem;
+}
+
+/* Stats Card - the "fancy" part */
+.stats-result {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  width: 300px;
+  max-width: 90vw;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.stats-result h2 {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.stats-result code {
+  color: #007BFF;
+}
+
+.clicks-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.clicks-count {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #222;
+  line-height: 1;
+}
+
+.clicks-label {
+  font-size: 1.2rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive adjustments */
@@ -78,9 +134,4 @@
   .container button {
     width: 100%;
   }
-}
-
-/* Error message */
-.error-message {
-  color: crimson;
 }

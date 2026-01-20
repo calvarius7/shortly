@@ -1,9 +1,8 @@
 import {Component} from '@angular/core';
-import {Creation} from './creation/creation';
 
 @Component({
   selector: 'app-root',
-  imports: [Creation],
+  imports: [],
   templateUrl: './app.html',
   styleUrl: './app.css',
   standalone: true

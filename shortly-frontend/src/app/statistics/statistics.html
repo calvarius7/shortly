@@ -1,0 +1,33 @@
+<div class="container">
+  <h1>Shortlink-Statistiken</h1>
+
+  <div class="input-group">
+    <label class="visually-hidden" for="stats-input">Shortcode eingeben</label>
+    <input
+      (ngModelChange)="shortCode.set($event)"
+      [ngModel]="shortCode()"
+      aria-describedby="error-message"
+      id="stats-input"
+      placeholder="Shortcode eingeben (z.B. abc123)"
+      type="text">
+    <button (click)="getStats()" [disabled]="loading()">Anzeigen</button>
+  </div>
+
+  @if (loading()) {
+    <p aria-live="polite">Lade Statistiken...</p>
+  }
+
+  @if (error()) {
+    <p class="error-message" id="error-message" role="alert">{{ error() }}</p>
+  }
+
+  @if (stats()) {
+    <div class="stats-result card">
+      <h2>Ergebnis für: <code>{{ stats()?.shortCode }}</code></h2>
+      <div class="clicks-display">
+        <span class="clicks-count">{{ stats()?.clicks }}</span>
+        <span class="clicks-label">Klicks</span>
+      </div>
+    </div>
+  }
+</div>

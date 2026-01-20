@@ -1,1 +1,6 @@
-<app-creation/>
+<nav>
+  <a [routerLinkActiveOptions]="{exact: true}" routerLink="/" routerLinkActive="active">Erstellen</a>
+  <a routerLink="/stats" routerLinkActive="active">Statistiken</a>
+</nav>
+
+<router-outlet/>
