@@ -26,7 +26,6 @@ frontend:deploy:
   variables:
     DOCKER_BUILDKIT: "1"
   stage: deploy
-  needs: [ "frontend:lint" ]
   before_script:
     - apk add --no-cache git jq curl coreutils
     - !reference [ .start_measurement, script ]

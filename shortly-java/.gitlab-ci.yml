@@ -170,7 +170,6 @@ java:deploy-native-image:
   variables:
     DOCKER_BUILDKIT: 1
   stage: deploy
-  needs: [ "java:unit-tests", "java:integration-tests" ]
   before_script:
     - apk add --no-cache git jq curl coreutils
     - !reference [ .start_measurement, script ]
