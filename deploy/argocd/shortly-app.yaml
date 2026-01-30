@@ -20,6 +20,7 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+        - values-version.yaml
         # starting from deploy/helm/shortly
         - ../../argocd/values-docker-desktop.yaml
 
