@@ -1,70 +1,39 @@
-# ShortlyFe
+# Shortly Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.2.
+Angular frontend for the Shortly URL shortener. The app uses a generated OpenAPI client and is intended as an exercise project.
 
-## Development server
+## What is it?
 
-To start a local development server, run:
+- Angular 21 App
+- API client is generated from `shortly_api.yaml`
+- Only really usable with a running backend
 
-```bash
-ng serve
-```
+## Prerequisites
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Node.js 20+ and npm (package.json uses npm@11.6.2)
+- Docker (optional, for a ready-made image)
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Run locally
 
 ```bash
-ng generate --help
+cd shortly-frontend
+npm install
+npm start
 ```
 
-## Building
+After that the app runs at `http://localhost:4200`.
 
-To build the project run:
+## Build Docker image
 
 ```bash
-ng build
+cd shortly-frontend
+docker build -t shortly-frontend:local .
+docker run --rm -p 80:80 shortly-frontend:local
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Update OpenAPI client (optional)
 
 ```bash
-ng test
+cd shortly-frontend
+npx openapi-generator-cli generate -i ../shortly_api.yaml -g typescript-angular -o src/app/core/modules/openapi --additional-properties fileNaming=kebab-case,withInterfaces=true --generate-alias-as-model
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-
-## Open Api Generator
-
-```bash
-npx openapi-generator-cli generate -i ../shortly_api.yaml -g typescript-angular -o src/app/core/modules/openapi --additional-properties fileNaming=kebab-case,withInterfaces=true --generate-alias-as-model      
-```
-
-## TODO
-
-- add stats view
-- add tests
