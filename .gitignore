@@ -1,4 +1,5 @@
 shortly-java/HELP.md
+shortly-java/nul
 target/
 shortly-java/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
