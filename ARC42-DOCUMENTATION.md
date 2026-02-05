@@ -283,14 +283,6 @@ Shortly ist ein URL-Shortener-Service, der lange URLs in kurze, 6-stellige alpha
 - Persistenz: Optional via Volume Mount
 - Size: ~35MB
 
-### 7.3 Resource-Anforderungen
-
-| Service  | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|----------|-------------|-----------|----------------|--------------|
-| Backend  | 100m        | 500m      | 128Mi          | 512Mi        |
-| Frontend | 50m         | 200m      | 64Mi           | 128Mi        |
-| Redis    | 50m         | 200m      | 128Mi          | 256Mi        |
-
 ---
 
 ## 8. Querschnittliche Konzepte
@@ -394,7 +386,6 @@ Shortly ist ein URL-Shortener-Service, der lange URLs in kurze, 6-stellige alpha
 
 **Begründung:**
 - Startup-Zeit: <1s (vs. 5-10s JVM)
-- Memory: ~128MB (vs. 512MB+ JVM)
 - Image-Size: 65MB mit UPX (vs. 200MB+ JVM)
 - Bessere Container-Density
 
@@ -466,18 +457,6 @@ Shortly ist ein URL-Shortener-Service, der lange URLs in kurze, 6-stellige alpha
 | Q5 | Testbarkeit    | >80% Coverage      | JUnit, Mockito, Testcontainers, JaCoCo         |
 | Q6 | Betreibbarkeit | Deployment <5min   | Helm-Charts, Health-Checks, Prometheus-Metrics |
 
-### 10.2 Performance-Metriken
-
-**Backend:**
-- Redirect-Latenz: P50 < 50ms, P99 < 100ms
-- API-Response-Time: P50 < 100ms, P99 < 500ms
-- Startup-Zeit: <1s (Native Image)
-
-**Frontend:**
-- Initial Load: <2s
-- Time to Interactive: <3s
-- Bundle-Size: <500KB (komprimiert)
-
 ---
 
 ## 11. Risiken und technische Schulden
@@ -490,7 +469,7 @@ Shortly ist ein URL-Shortener-Service, der lange URLs in kurze, 6-stellige alpha
 | R2      | Kollisions-Performance        | Niedrig            | Mittel  | Wechsel zu Sequenz-basierter Generierung | ABGELEHNT   |
 | R3      | Click-Tracking Race-Condition | Hoch               | Niedrig | Redis INCR verwenden                     | ✅ ERLEDIGT |
 | R4      | Keine Authentication          | Hoch               | Mittel  | API-Key für Admin-Endpoints              | OFFEN       |
-| R5      | Native-Image-Build-Fehler     | Niedrig            | Hoch    | Reflection-Hints pflegen                 | OFFEN       |
+| R5      | Native-Image-Build-Fehler     | Niedrig            | Hoch    | Reflection-Hints pflegen                 | ✅ ERLEDIGT |
 
 ### 11.2 Technische Schulden
 
