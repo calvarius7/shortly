@@ -21,7 +21,7 @@ public class RedisHealthIndicator implements HealthIndicator {
     @Override
     public Health health() {
         final long startTime = System.currentTimeMillis();
-        try (final RedisConnection connection = redisConnectionFactory.getConnection()) {
+        try (@SuppressWarnings("LocalCanBeFinal") RedisConnection connection = redisConnectionFactory.getConnection()) {
             // Ping Redis to check connectivity
             final String pong = connection.ping();
             final long responseTime = System.currentTimeMillis() - startTime;
