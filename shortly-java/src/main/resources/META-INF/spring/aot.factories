@@ -1,1 +1,3 @@
-org.springframework.aot.hint.RuntimeHintsRegistrar=neusta.shortly.ValidationMessagesRuntimeHints
+org.springframework.aot.hint.RuntimeHintsRegistrar=\
+neusta.shortly.ValidationMessagesRuntimeHints,\
+neusta.shortly.LogstashRuntimeHints
