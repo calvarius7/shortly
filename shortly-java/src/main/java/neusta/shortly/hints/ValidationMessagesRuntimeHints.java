@@ -1,4 +1,4 @@
-package neusta.shortly;
+package neusta.shortly.hints;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;

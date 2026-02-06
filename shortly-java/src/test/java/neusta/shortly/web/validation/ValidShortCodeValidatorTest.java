@@ -16,19 +16,18 @@ class ValidShortCodeValidatorTest {
     @DisplayName("isValid()")
     class IsValid {
         @Test
-        @DisplayName("gibt true für exakt " + ShortCodeGenerator.LENGTH + " Zeichen zurück")
+        @DisplayName("true for exactly " + ShortCodeGenerator.LENGTH + " chars")
         void validLength() {
             assertThat(validator.isValid("A".repeat(ShortCodeGenerator.LENGTH), null)).isTrue();
         }
 
         @Test
-        @DisplayName("gibt false für null zurück")
         void nullIsInvalid() {
             assertThat(validator.isValid(null, null)).isFalse();
         }
 
         @Test
-        @DisplayName("gibt false für andere Längen zurück")
+        @DisplayName("returns false for invalid lengths")
         void wrongLengths() {
             assertThat(validator.isValid("ABCDE", null)).isFalse();
             assertThat(validator.isValid("ABCDEFG", null)).isFalse();

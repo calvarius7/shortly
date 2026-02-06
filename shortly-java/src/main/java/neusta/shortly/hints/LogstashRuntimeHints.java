@@ -1,4 +1,4 @@
-package neusta.shortly;
+package neusta.shortly.hints;
 
 import net.logstash.logback.encoder.LogstashEncoder;
 import net.logstash.logback.fieldnames.LogstashFieldNames;
