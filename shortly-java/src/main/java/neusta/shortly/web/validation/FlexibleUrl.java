@@ -33,11 +33,12 @@ public @interface FlexibleUrl {
 
             final var normalizedUrl = UrlNormalizer.normalize(url);
             try {
-                final var ignored = new URI(normalizedUrl).toURL();
+                //noinspection ResultOfMethodCallIgnored
+                new URI(normalizedUrl).toURL();
+                return true;
             } catch (final MalformedURLException | URISyntaxException | IllegalArgumentException e) {
                 return false;
             }
-            return true;
         }
     }
 }

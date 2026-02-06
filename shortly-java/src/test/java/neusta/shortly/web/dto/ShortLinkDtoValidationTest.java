@@ -17,7 +17,7 @@ class ShortLinkDtoValidationTest {
 
     @BeforeAll
     static void setup() {
-        // Sicherstellen, dass deutsche Messages aus ValidationMessages.properties verwendet werden
+        // ensure german messages from ValidationMessages.properties are used
         defaultLocale = Locale.getDefault();
         Locale.setDefault(Locale.GERMAN);
         final var factory = Validation.buildDefaultValidatorFactory();
@@ -33,7 +33,7 @@ class ShortLinkDtoValidationTest {
     @DisplayName("valid")
     class ValidCases {
         @Test
-        @DisplayName("gültige URL + expiresAt in der Zukunft")
+        @DisplayName("valid URL expiresAt in the future")
         void valid() {
             final var dto = new ShortLinkDto("https://example.org/ok", Instant.now().plusSeconds(60));
             final var violations = validator.validate(dto);
@@ -45,7 +45,7 @@ class ShortLinkDtoValidationTest {
     @DisplayName("invalid")
     class InvalidCases {
         @Test
-        @DisplayName("leere URL")
+        @DisplayName("blank URL")
         void blankUrl() {
             final var dto = new ShortLinkDto("", Instant.now().plusSeconds(60));
             final var violations = validator.validate(dto);
@@ -53,15 +53,15 @@ class ShortLinkDtoValidationTest {
         }
 
         @Test
-        @DisplayName("ungültige URL")
+        @DisplayName("invalid URL")
         void invalidUrl() {
-            final var dto = new ShortLinkDto("not-a-url", Instant.now().plusSeconds(60));
+            final var dto = new ShortLinkDto("not a url", Instant.now().plusSeconds(60));
             final var violations = validator.validate(dto);
             assertThat(violations).anySatisfy(v -> assertThat(v.getMessage()).contains("Muss eine gültige URL sein"));
         }
 
         @Test
-        @DisplayName("expiresAt in der Vergangenheit")
+        @DisplayName("expiresAt in the past")
         void pastExpiry() {
             final var dto = new ShortLinkDto("https://example.org/ok", Instant.now().minusSeconds(5));
             final var violations = validator.validate(dto);
