@@ -1,0 +1,84 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separateMajorReleases",
+    "schedule:weekly"
+  ],
+  "timezone": "Europe/Berlin",
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "prConcurrentLimit": 5,
+  "prCreation": "not-pending",
+  "rebaseWhen": "behind-base-branch",
+  "platformAutomerge": true,
+  "ignoreTests": false,
+  "packageRules": [
+    {
+      "description": "Group Angular packages together",
+      "matchPackagePatterns": ["^@angular/"],
+      "groupName": "Angular",
+      "automerge": false
+    },
+    {
+      "description": "Group ESLint packages together",
+      "matchPackagePatterns": ["eslint"],
+      "groupName": "ESLint",
+      "automerge": false
+    },
+    {
+      "description": "Group TypeScript packages together",
+      "matchPackagePatterns": ["typescript"],
+      "groupName": "TypeScript",
+      "automerge": false
+    },
+    {
+      "description": "Group Spring Boot dependencies",
+      "matchDatasources": ["maven"],
+      "matchPackagePatterns": ["^org.springframework.boot:"],
+      "groupName": "Spring Boot",
+      "automerge": false
+    },
+    {
+      "description": "Auto-merge patch updates for non-major dependencies",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Auto-merge minor updates for devDependencies",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Pin Docker digests for security",
+      "matchDatasources": ["docker"],
+      "pinDigests": true
+    },
+    {
+      "description": "Update Helm chart dependencies",
+      "matchManagers": ["helmv3"],
+      "automerge": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": []
+  },
+  "maven": {
+    "enabled": true
+  },
+  "npm": {
+    "enabled": true
+  },
+  "docker": {
+    "enabled": true
+  },
+  "helm": {
+    "enabled": true
+  }
+}
