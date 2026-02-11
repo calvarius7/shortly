@@ -1,9 +1,6 @@
 import type {HttpErrorResponse} from '@angular/common/http';
 
-/**
- * Minimales Laufzeitmodell für Server-Fehler.
- * Passt zu gängigen REST-Responses mit "detail".
- */
+
 export type ApiError = Readonly<Record<string, unknown>> & {
   detail?: string;
 };

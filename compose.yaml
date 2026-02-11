@@ -1,3 +1,4 @@
+#for local development
 services:
   #  app:
   #    build: shortly_java/.
